@@ -5,8 +5,6 @@ import ViewToggle from "@/components/ViewToggle";
 import ListView from "@/components/ListView";
 import MapView from "@/components/MapView"; // no props version
 import { mockMatchaPlaces, MatchaPlace } from "@/data/mockMatcha";
-import { PlacesService, getCurrentLocation, UserLocation } from "@/services/placesService";
-import { Loader } from "@googlemaps/js-api-loader";
 import { useToast } from "@/hooks/use-toast";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
@@ -19,7 +17,6 @@ export default function Index() {
   const [currentView, setCurrentView] = useState<"list" | "map">("list");
   const [places, setPlaces] = useState<MatchaPlace[]>(mockMatchaPlaces);
   const [loading, setLoading] = useState(false);
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,7 +26,6 @@ export default function Index() {
 
   const initializePlaces = async () => {
     setLoading(true);
-
     try {
       // get user location (fallback to Sydney)
       const getLoc = () =>
@@ -72,10 +68,11 @@ export default function Index() {
     } catch (err) {
       console.error("Failed to fetch places from backend:", err);
       toast({
-        title: "Error Loading Places",
+        title: "Error Fetching Places",
         description: "Using demo data instead",
         variant: "destructive",
       });
+      setPlaces(mockMatchaPlaces);
     } finally {
       setLoading(false);
     }
@@ -99,7 +96,7 @@ export default function Index() {
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-matcha-dark mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Finding nearby matcha places...</p>
+              <p className="text-muted-foreground">Loading matcha places...</p>
             </div>
           </div>
         ) : currentView === "list" ? (
