@@ -3,15 +3,19 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import ViewToggle from "@/components/ViewToggle";
 import ListView from "@/components/ListView";
-import MapView from "@/components/MapView";
+import MapView from "@/components/MapView"; // no props version
 import { mockMatchaPlaces, MatchaPlace } from "@/data/mockMatcha";
 import { PlacesService, getCurrentLocation, UserLocation } from "@/services/placesService";
 import { Loader } from "@googlemaps/js-api-loader";
 import { useToast } from "@/hooks/use-toast";
 
-const Index = () => {
-  const navigate = useNavigate();
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const toDollar = (n?: number | null) =>
+  typeof n === "number" && n > 0 ? "$".repeat(Math.min(4, n)) : "—";
+const fakeScore = () => Math.floor(80 + Math.random() * 20);
 
+export default function Index() {
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<"list" | "map">("list");
   const [places, setPlaces] = useState<MatchaPlace[]>(mockMatchaPlaces);
   const [loading, setLoading] = useState(false);
@@ -20,61 +24,53 @@ const Index = () => {
 
   useEffect(() => {
     initializePlaces();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializePlaces = async () => {
     setLoading(true);
 
     try {
-      // Get user location
-      const location = await getCurrentLocation();
-      setUserLocation(location);
-
-      // Check if we have a valid Google Maps API key
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-      if (!apiKey || apiKey === "demo-key") {
-        toast({
-          title: "Using Demo Data",
-          description: "Add your Google Maps API key to see real nearby places",
+      // get user location (fallback to Sydney)
+      const getLoc = () =>
+        new Promise<{ lat: number; lng: number }>((resolve) => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+              () => resolve({ lat: -33.8688, lng: 151.2093 })
+            );
+          } else {
+            resolve({ lat: -33.8688, lng: 151.2093 });
+          }
         });
-        setLoading(false);
-        return;
-      }
 
-      // Initialize Google Maps and search for places
-      const loader = new Loader({
-        apiKey: apiKey,
-        version: "weekly",
-        libraries: ["places", "marker"]
+      const { lat, lng } = await getLoc();
+      const res = await fetch(`${API_BASE}/places/?lat=${lat}&lng=${lng}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const raw = await res.json();
+
+      // Normalize backend -> MatchaPlace (so PlaceCard never gets undefined for strings)
+      const mapped: MatchaPlace[] = (Array.isArray(raw) ? raw : raw.results || []).map((p: any) => ({
+        id: p.id ?? p.place_id ?? crypto.randomUUID(),
+        name: p.name ?? "Unknown",
+        lat: p.lat ?? p.geometry?.location?.lat ?? -33.8688,
+        lng: p.lng ?? p.geometry?.location?.lng ?? 151.2093,
+        rating: typeof p.rating === "number" ? p.rating : 0,
+        priceRange: p.price_range ?? toDollar(p.price_level),
+        distance: typeof p.distance === "number" ? p.distance : 0,
+        matchScore: typeof p.match_score === "number" ? p.match_score : fakeScore(),
+        address: (p.vicinity ?? p.address ?? "") as string, // <- always a string for .slice()
+        photoUrl: Array.isArray(p.photos) && p.photos.length ? p.photos[0] : undefined,
+        openNow: p.open_now ?? p.opening_hours?.open_now ?? undefined,
+      }));
+
+      setPlaces(mapped);
+      toast({
+        title: "Loaded Places",
+        description: `Found ${mapped.length} matcha places from backend.`,
       });
-
-      const { Map } = await loader.importLibrary("maps");
-
-      // Create a temporary map for the places service
-      const tempMapDiv = document.createElement("div");
-      const tempMap = new Map(tempMapDiv, {
-        center: { lat: location.lat, lng: location.lng },
-        zoom: 13,
-      });
-
-      const placesService = new PlacesService(tempMap);
-      const nearbyPlaces = await placesService.searchNearbyMatcha(location);
-
-      if (nearbyPlaces.length > 0) {
-        setPlaces(nearbyPlaces);
-        toast({
-          title: "Found Nearby Places",
-          description: `Discovered ${nearbyPlaces.length} matcha places near you!`,
-        });
-      } else {
-        toast({
-          title: "No Places Found",
-          description: "Using demo data - try a different location or search term",
-        });
-      }
-    } catch (error) {
-      console.error("Error loading places:", error);
+    } catch (err) {
+      console.error("Failed to fetch places from backend:", err);
       toast({
         title: "Error Loading Places",
         description: "Using demo data instead",
@@ -88,13 +84,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-center mb-6 space-x-4">
-          <ViewToggle
-            currentView={currentView}
-            onViewChange={setCurrentView}
-          />
+          <ViewToggle currentView={currentView} onViewChange={setCurrentView} />
           <button
             onClick={() => navigate("/calendar")}
             className="bg-matcha-medium hover:bg-matcha-dark text-white font-semibold py-2 px-4 rounded-lg transition"
@@ -110,18 +102,12 @@ const Index = () => {
               <p className="text-muted-foreground">Finding nearby matcha places...</p>
             </div>
           </div>
+        ) : currentView === "list" ? (
+          <ListView places={places} />
         ) : (
-          <>
-            {currentView === "list" ? (
-              <ListView places={places} />
-            ) : (
-              <MapView places={places} />
-            )}
-          </>
+          <MapView /> 
         )}
       </div>
     </div>
   );
-};
-
-export default Index;
+}
