@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AIFinder from "./pages/AIFinder";  // import your new AI splash page
+import CalendarPage from "./pages/Calendar"
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AIFinder />} /> {/* Splash AI page */}
+          <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/home" element={<Index />} /> {/* Your existing homepage */}
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

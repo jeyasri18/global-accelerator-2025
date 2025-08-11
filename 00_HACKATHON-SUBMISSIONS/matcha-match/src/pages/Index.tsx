@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import ViewToggle from "@/components/ViewToggle";
 import ListView from "@/components/ListView";
@@ -9,6 +10,8 @@ import { Loader } from "@googlemaps/js-api-loader";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   const [currentView, setCurrentView] = useState<"list" | "map">("list");
   const [places, setPlaces] = useState<MatchaPlace[]>(mockMatchaPlaces);
   const [loading, setLoading] = useState(false);
@@ -21,7 +24,7 @@ const Index = () => {
 
   const initializePlaces = async () => {
     setLoading(true);
-    
+
     try {
       // Get user location
       const location = await getCurrentLocation();
@@ -29,7 +32,7 @@ const Index = () => {
 
       // Check if we have a valid Google Maps API key
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      
+
       if (!apiKey || apiKey === "demo-key") {
         toast({
           title: "Using Demo Data",
@@ -47,7 +50,7 @@ const Index = () => {
       });
 
       const { Map } = await loader.importLibrary("maps");
-      
+
       // Create a temporary map for the places service
       const tempMapDiv = document.createElement("div");
       const tempMap = new Map(tempMapDiv, {
@@ -57,7 +60,7 @@ const Index = () => {
 
       const placesService = new PlacesService(tempMap);
       const nearbyPlaces = await placesService.searchNearbyMatcha(location);
-      
+
       if (nearbyPlaces.length > 0) {
         setPlaces(nearbyPlaces);
         toast({
@@ -85,15 +88,21 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-center mb-6">
-          <ViewToggle 
-            currentView={currentView} 
-            onViewChange={setCurrentView} 
+        <div className="flex justify-center mb-6 space-x-4">
+          <ViewToggle
+            currentView={currentView}
+            onViewChange={setCurrentView}
           />
+          <button
+            onClick={() => navigate("/calendar")}
+            className="bg-matcha-medium hover:bg-matcha-dark text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            View Matcha Calendar
+          </button>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
