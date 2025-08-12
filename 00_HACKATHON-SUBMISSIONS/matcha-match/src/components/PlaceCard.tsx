@@ -80,7 +80,8 @@ export default function PlaceCard({ place }: PlaceCardProps) {
         <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
           <div className="flex items-center space-x-1">
             <DollarSign className="h-4 w-4" />
-            <span>{priceRange}</span>
+            <span>{place.priceRange || "$$"}</span>
+
           </div>
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
