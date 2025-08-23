@@ -19,14 +19,38 @@ export default function PlaceCard({ place }: PlaceCardProps) {
 
   const openInGoogleMaps = () => {
     try {
-      if (place.lat && place.lng) {
-        const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
+      // Priority 1: Use place_id if available (shows full business profile)
+      if (place.id && place.id.startsWith('ChIJ')) {
+        const url = `https://www.google.com/maps/place/?q=place_id:${place.id}`;
         window.open(url, '_blank');
-      } else if (place.name && (place.address || place.vicinity)) {
+        return;
+      }
+      
+      // Priority 2: Use place_id from backend if available
+      if (place.place_id && place.place_id.startsWith('ChIJ')) {
+        const url = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
+        window.open(url, '_blank');
+        return;
+      }
+      
+      // Priority 3: Search by name + address (better than coordinates)
+      if (place.name && (place.address || place.vicinity)) {
         const searchQuery = encodeURIComponent(`${place.name} ${place.address || place.vicinity}`);
         const url = `https://www.google.com/maps/search/${searchQuery}`;
         window.open(url, '_blank');
+        return;
       }
+      
+      // Priority 4: Fallback to coordinates (least preferred)
+      if (place.lat && place.lng) {
+        const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
+        window.open(url, '_blank');
+        return;
+      }
+      
+      // Last resort: open Google Maps homepage
+      window.open('https://www.google.com/maps', '_blank');
+      
     } catch (error) {
       console.error('Error opening Google Maps:', error);
       window.open('https://www.google.com/maps', '_blank');

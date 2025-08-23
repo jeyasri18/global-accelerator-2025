@@ -316,6 +316,7 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
                 # Create recommendation
                 recommendation = {
                     'id': place_id,
+                    'place_id': place_id,  # Add place_id for Google Maps integration
                     'name': place_name,
                     'address': place_address,
                     'rating': place_rating,

@@ -87,6 +87,7 @@ class PlacesView(View):
                 
                 processed_place = {
                     'id': place.get('place_id', ''),
+                    'place_id': place.get('place_id', ''),  # Keep original place_id for Google Maps
                     'name': place.get('name', 'Unknown Place'),
                     'rating': place.get('rating', 0),
                     'price_level': place.get('price_level'),

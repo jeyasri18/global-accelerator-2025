@@ -88,14 +88,31 @@ const TopPlacesCarousel: React.FC = () => {
 
   const openInGoogleMaps = (place: TopPlace) => {
     try {
-      if (place.lat && place.lng) {
-        const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
+      // Priority 1: Use place_id if available (shows full business profile)
+      if (place.id && place.id.startsWith('ChIJ')) {
+        const url = `https://www.google.com/maps/place/?q=place_id:${place.id}`;
         window.open(url, '_blank');
-      } else if (place.name && place.address) {
+        return;
+      }
+      
+      // Priority 2: Search by name + address (better than coordinates)
+      if (place.name && place.address) {
         const searchQuery = encodeURIComponent(`${place.name} ${place.address}`);
         const url = `https://www.google.com/maps/search/${searchQuery}`;
         window.open(url, '_blank');
+        return;
       }
+      
+      // Priority 3: Fallback to coordinates (least preferred)
+      if (place.lat && place.lng) {
+        const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
+        window.open(url, '_blank');
+        return;
+      }
+      
+      // Last resort: open Google Maps homepage
+      window.open('https://www.google.com/maps', '_blank');
+      
     } catch (error) {
       console.error('Error opening Google Maps:', error);
       window.open('https://www.google.com/maps', '_blank');
