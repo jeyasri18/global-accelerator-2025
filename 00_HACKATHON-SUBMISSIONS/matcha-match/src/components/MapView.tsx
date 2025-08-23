@@ -196,60 +196,11 @@
 //     </div>
 //   );
 // }
+
+
 import { useEffect, useRef, useState } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import { Star, MapPin } from "lucide-react";
-
-declare global {
-  namespace google {
-    namespace maps {
-      class Map {
-        constructor(element: HTMLElement, options: any);
-      }
-      class LatLng {
-        constructor(lat: number, lng: number);
-      }
-      namespace marker {
-        class AdvancedMarkerElement {
-          constructor(options: any);
-        }
-      }
-      namespace places {
-        class PlacesService {
-          constructor(map: Map);
-          nearbySearch(request: any, callback: (results: any[], status: any) => void): void;
-        }
-        enum PlacesServiceStatus {
-          OK = "OK"
-        }
-        interface PlaceSearchRequest {
-          location: LatLng;
-          radius: number;
-          keyword?: string;
-          type?: string;
-        }
-        interface PlaceResult {
-          place_id?: string;
-          name?: string;
-          rating?: number;
-          price_level?: number;
-          vicinity?: string;
-          geometry?: {
-            location?: {
-              lat(): number;
-              lng(): number;
-            };
-          };
-          types?: string[];
-          photos?: Array<{
-            getUrl(options: { maxWidth: number; maxHeight: number }): string;
-          }>;
-        }
-      }
-    }
-  }
-}
-
 // UPDATED: Interface to match Django API response
 interface DjangoPlace {
   id: string;
