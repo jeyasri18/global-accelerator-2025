@@ -314,7 +314,9 @@ def get_cafe_recommendations(user_message, sentiment, preferences):
                     'price_level': price_display,
                     'match_reason': f"Great matcha café in Sydney - perfect for your {sentiment} mood",
                     'distance': place_distance,
-                    'photo_url': None  # Skip photos for now to avoid errors
+                    'photo_url': None,  # Skip photos for now to avoid errors
+                    'lat': place.get('geometry', {}).get('location', {}).get('lat'),
+                    'lng': place.get('geometry', {}).get('location', {}).get('lng')
                 }
                 
                 recommendations.append(recommendation)

@@ -133,6 +133,32 @@ const AIChatInterface: React.FC = () => {
     }
   };
 
+  const openInGoogleMaps = (cafe: any) => {
+    try {
+      // Try to use coordinates if available
+      if (cafe.lat && cafe.lng) {
+        const url = `https://www.google.com/maps?q=${cafe.lat},${cafe.lng}`;
+        window.open(url, '_blank');
+      }
+      // Fallback to search by name and address
+      else if (cafe.name && cafe.address) {
+        const searchQuery = encodeURIComponent(`${cafe.name} ${cafe.address}`);
+        const url = `https://www.google.com/maps/search/${searchQuery}`;
+        window.open(url, '_blank');
+      }
+      // Last resort: just search by name
+      else if (cafe.name) {
+        const searchQuery = encodeURIComponent(cafe.name);
+        const url = `https://www.google.com/maps/search/${searchQuery}`;
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening Google Maps:', error);
+      // Fallback: open Google Maps homepage
+      window.open('https://www.google.com/maps', '_blank');
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg border border-gray-200">
       {/* Header */}
@@ -185,10 +211,16 @@ const AIChatInterface: React.FC = () => {
                 <div className="mt-3 space-y-2">
                   <p className="text-xs font-medium text-gray-600">🍵 Here are your café recommendations:</p>
                   {message.recommendations.map((cafe, cafeIndex) => (
-                    <div key={cafeIndex} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                    <div 
+                      key={cafeIndex} 
+                      className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-green-300 cursor-pointer transition-all duration-200 group"
+                      onClick={() => openInGoogleMaps(cafe)}
+                    >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-gray-800">{cafe.name}</h4>
+                          <h4 className="font-semibold text-sm text-gray-800 group-hover:text-green-700 transition-colors">
+                            {cafe.name}
+                          </h4>
                           <p className="text-xs text-gray-600 flex items-center mt-1">
                             <MapPin className="w-3 h-3 mr-1" />
                             {cafe.address}
@@ -205,6 +237,14 @@ const AIChatInterface: React.FC = () => {
                             </span>
                           </div>
                         </div>
+                        <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                            <MapPin className="w-3 h-3 text-green-600" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Click to open in Google Maps →
                       </div>
                     </div>
                   ))}
