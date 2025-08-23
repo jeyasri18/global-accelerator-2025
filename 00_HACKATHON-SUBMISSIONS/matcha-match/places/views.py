@@ -198,15 +198,29 @@ class PlacesView(View):
         return price_map.get(price_level, "Price not available")
     
     def get_photo_urls(self, photos):
-        """Extract photo URLs from place photos"""
+        """Extract photo URLs from place photos with better fallbacks"""
         photo_urls = []
-        for photo in photos[:3] if photos else []:  # Limit to first 3 photos
+        
+        if not photos:
+            return []
+            
+        for photo in photos[:3]:  # Limit to first 3 photos
             photo_reference = photo.get('photo_reference')
             if photo_reference:
-                # You can construct the photo URL using the photo reference
-                # This is a simplified version - you might want to use the actual Google Places Photo API
-                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={settings.GOOGLE_MAPS_API_KEY}"
-                photo_urls.append(photo_url)
+                try:
+                    # Try to construct photo URL with API key
+                    from django.conf import settings
+                    api_key = getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
+                    
+                    if api_key:
+                        photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={api_key}"
+                        photo_urls.append(photo_url)
+                    else:
+                        # If no API key, skip this photo - frontend will handle fallback
+                        continue
+                except Exception as e:
+                    print(f"Error constructing photo URL: {e}")
+                    continue
         
         return photo_urls
 

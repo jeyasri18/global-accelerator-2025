@@ -85,7 +85,19 @@ export default function PlaceCard({ place }: PlaceCardProps) {
     if (Array.isArray(place.photos) && place.photos.length > 0) {
       return place.photos[0]; // Use first photo from array
     }
-    return "https://placehold.co/800x400?text=Matcha";
+    
+    // Create attractive fallback images based on café name
+    const cafeName = place.name || 'Matcha';
+    const fallbackColors = [
+      '4ade80', // Green
+      '22c55e', // Darker green
+      '16a34a', // Forest green
+      '15803d', // Deep green
+      '166534'  // Very dark green
+    ];
+    const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
+    
+    return `https://via.placeholder.com/800x400/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
   })();
 
   const getMatchScoreColor = (score: number) => {
@@ -105,8 +117,12 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           alt={text(place.name)}
           className="w-full h-48 object-cover"
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src =
-              "https://placehold.co/800x400?text=Matcha";
+            // Create a better fallback image with the café name
+            const cafeName = place.name || 'Matcha';
+            const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d', '166534'];
+            const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
+            (e.currentTarget as HTMLImageElement).src = 
+              `https://via.placeholder.com/800x400/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
           }}
         />
         <Badge className={`absolute top-3 right-3 ${getMatchScoreColor(matchScore)}`}>
