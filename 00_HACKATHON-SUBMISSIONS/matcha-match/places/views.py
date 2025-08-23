@@ -133,11 +133,22 @@ class PlacesView(View):
                 break
         
         # Distance factor (0-20 points, closer is better)
-        distance = self.calculate_distance(
-            user_lat, user_lng,
-            place['geometry']['location']['lat'],
-            place['geometry']['location']['lng']
-        )
+        try:
+            # Handle different possible data structures
+            if 'geometry' in place and 'location' in place['geometry']:
+                place_lat = place['geometry']['location']['lat']
+                place_lng = place['geometry']['location']['lng']
+            elif 'lat' in place and 'lng' in place:
+                place_lat = place['lat']
+                place_lng = place['lng']
+            else:
+                place_lat = user_lat
+                place_lng = user_lng
+            
+            distance = self.calculate_distance(user_lat, user_lng, place_lat, place_lng)
+        except Exception as e:
+            print(f"Error calculating distance: {e}")
+            distance = 5.0  # Default distance
         if distance <= 1:  # Within 1 mile
             score += 20
         elif distance <= 3:  # Within 3 miles
@@ -188,7 +199,7 @@ class PlacesView(View):
     def get_photo_urls(self, photos):
         """Extract photo URLs from place photos"""
         photo_urls = []
-        for photo in photos[:3]:  # Limit to first 3 photos
+        for photo in photos[:3] if photos else []:  # Limit to first 3 photos
             photo_reference = photo.get('photo_reference')
             if photo_reference:
                 # You can construct the photo URL using the photo reference

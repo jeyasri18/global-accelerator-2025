@@ -6,6 +6,7 @@ interface Message {
   content: string;
   timestamp: string;
   sentiment?: string;
+  recommendations?: any[];
 }
 
 interface ChatResponse {
@@ -99,10 +100,12 @@ const AIChatInterface: React.FC = () => {
       if (response.ok) {
         const data: ChatResponse = await response.json();
         
+        // Create AI message with recommendations
         const aiMessage: Message = {
           role: 'assistant',
           content: data.message,
           timestamp: new Date().toISOString(),
+          recommendations: data.recommendations || [], // Add recommendations
         };
 
         setMessages(prev => [...prev, aiMessage]);
@@ -176,6 +179,38 @@ const AIChatInterface: React.FC = () => {
                 )}
                 <p className="text-sm">{message.content}</p>
               </div>
+              
+              {/* Show recommendations if available */}
+              {message.role === 'assistant' && message.recommendations && message.recommendations.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-medium text-gray-600">🍵 Here are your café recommendations:</p>
+                  {message.recommendations.map((cafe, cafeIndex) => (
+                    <div key={cafeIndex} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm text-gray-800">{cafe.name}</h4>
+                          <p className="text-xs text-gray-600 flex items-center mt-1">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {cafe.address}
+                          </p>
+                          <div className="flex items-center space-x-3 mt-2">
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                              ⭐ {cafe.rating}
+                            </span>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                              {cafe.price_level}
+                            </span>
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                              {cafe.distance}km
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <div className={`text-xs mt-1 ${
                 message.role === 'user' ? 'text-green-100' : 'text-gray-500'
               }`}>
