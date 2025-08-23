@@ -236,38 +236,68 @@ const AIChatInterface: React.FC = () => {
                   {message.recommendations.map((cafe, cafeIndex) => (
                     <div 
                       key={cafeIndex} 
-                      className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm hover:shadow-md hover:border-green-300 cursor-pointer transition-all duration-200 group"
+                      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-green-300 cursor-pointer transition-all duration-200 group overflow-hidden"
                       onClick={() => openInGoogleMaps(cafe)}
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-gray-800 group-hover:text-green-700 transition-colors">
-                            {cafe.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 flex items-center mt-1">
-                            <MapPin className="w-3 h-3 mr-1" />
-                            {cafe.address}
-                          </p>
-                          <div className="flex items-center space-x-3 mt-2">
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                              ⭐ {cafe.rating}
-                            </span>
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                              {cafe.price_level}
-                            </span>
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                              {cafe.distance}km
-                            </span>
+                      {/* Photo Section */}
+                      {cafe.photos && cafe.photos.length > 0 ? (
+                        <div className="relative h-32 overflow-hidden">
+                          <img
+                            src={cafe.photos[0]}
+                            alt={cafe.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              // Fallback to themed placeholder if image fails
+                              const cafeName = cafe.name || 'Café';
+                              const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d', '166534'];
+                              const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
+                              (e.currentTarget as HTMLImageElement).src = 
+                                `https://via.placeholder.com/400x200/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        // Fallback image when no photos available
+                        <div className="relative h-32 bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center">
+                          <div className="text-center">
+                            <Coffee className="w-8 h-8 text-green-600 mx-auto mb-1" />
+                            <p className="text-xs text-green-700 font-medium">{cafe.name}</p>
                           </div>
                         </div>
-                        <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                            <MapPin className="w-3 h-3 text-green-600" />
+                      )}
+                      
+                      {/* Content Section */}
+                      <div className="p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-gray-800 group-hover:text-green-700 transition-colors">
+                              {cafe.name}
+                            </h4>
+                            <p className="text-xs text-gray-600 flex items-center mt-1">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {cafe.address}
+                            </p>
+                            <div className="flex items-center space-x-3 mt-2">
+                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                                ⭐ {cafe.rating}
+                              </span>
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                {cafe.price_level}
+                              </span>
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                {cafe.distance}km
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                              <MapPin className="w-3 h-3 text-green-600" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="mt-2 text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Click to open in Google Maps →
+                        <div className="mt-2 text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                          Click to open in Google Maps →
+                        </div>
                       </div>
                     </div>
                   ))}

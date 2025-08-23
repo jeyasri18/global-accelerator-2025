@@ -313,6 +313,25 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
                 else:
                     price_display = '$$'
                 
+                # Get photos from the place data
+                photos = place.get('photos', [])
+                photo_urls = []
+                
+                # Convert photo references to URLs if available
+                if photos and isinstance(photos, list):
+                    for photo in photos[:3]:  # Limit to first 3 photos
+                        photo_reference = photo.get('photo_reference')
+                        if photo_reference:
+                            try:
+                                from django.conf import settings
+                                api_key = getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
+                                if api_key:
+                                    photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={api_key}"
+                                    photo_urls.append(photo_url)
+                            except Exception as e:
+                                print(f"Error constructing photo URL: {e}")
+                                continue
+                
                 # Create recommendation
                 recommendation = {
                     'id': place_id,
@@ -323,7 +342,7 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
                     'price_level': price_display,
                     'match_reason': f"Great matcha café in Sydney - perfect for your {sentiment} mood",
                     'distance': place_distance_km,  # Now in kilometers
-                    'photo_url': None,  # Skip photos for now to avoid errors
+                    'photos': photo_urls,  # Include actual photos
                     'lat': place.get('geometry', {}).get('location', {}).get('lat'),
                     'lng': place.get('geometry', {}).get('location', {}).get('lng')
                 }
