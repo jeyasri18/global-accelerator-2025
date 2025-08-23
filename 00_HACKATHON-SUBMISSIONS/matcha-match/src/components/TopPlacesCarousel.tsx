@@ -3,12 +3,13 @@ import { Star, MapPin, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface TopPlace {
   id: string;
+  place_id: string;
   name: string;
   address: string;
   rating: number;
   price_level: string;
   distance: number;
-  photo_url?: string;
+  photos?: string[];
   lat?: number;
   lng?: number;
 }
@@ -16,54 +17,137 @@ interface TopPlace {
 const TopPlacesCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [topPlaces, setTopPlaces] = useState<TopPlace[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
 
-  // Sample top places data (you can replace this with real API data)
-  const topPlaces: TopPlace[] = [
-    {
-      id: '1',
-      name: 'Matcha-Ya',
-      address: 'NW.05/10 Steam Mill La, Haymarket',
-      rating: 4.8,
-      price_level: '$$',
-      distance: 0.8,
-      lat: -33.8688,
-      lng: 151.2093
-    },
-    {
-      id: '2',
-      name: 'Zensation Tea House',
-      address: 'Shop 82/788 Bourke St, Waterloo',
-      rating: 4.9,
-      price_level: '$$',
-      distance: 2.0,
-      lat: -33.9014,
-      lng: 151.2076
-    },
-    {
-      id: '3',
-      name: 'Oh!Matcha',
-      address: 'Shop 11/501 George St, Sydney',
-      rating: 4.7,
-      price_level: '$',
-      distance: 0.4,
-      lat: -33.8728,
-      lng: 151.2062
-    },
-    {
-      id: '4',
-      name: 'Cafe Maru',
-      address: '189 Kent St, Sydney',
-      rating: 4.9,
-      price_level: '$$',
-      distance: 0.5,
-      lat: -33.8705,
-      lng: 151.2047
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('Got user location:', position.coords);
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          // Fallback to a default location (Sydney)
+          console.log('Using fallback location: Sydney');
+          setUserLocation({ lat: -33.8688, lng: 151.2093 });
+        }
+      );
+    } else {
+      console.log('Geolocation not supported, using fallback location: Sydney');
+      // Fallback to a default location (Sydney)
+      setUserLocation({ lat: -33.8688, lng: 151.2093 });
     }
-  ];
+  }, []);
+
+  // Fetch real top places from your API
+  useEffect(() => {
+    if (!userLocation) return;
+
+    const fetchTopPlaces = async () => {
+      try {
+        console.log('Fetching places for location:', userLocation);
+        const response = await fetch(`http://localhost:8000/api/places/?lat=${userLocation.lat}&lng=${userLocation.lng}`);
+        console.log('API response status:', response.status);
+        
+        if (response.ok) {
+          const places = await response.json();
+          console.log('Got places from API:', places.length);
+          console.log('First place data:', places[0]);
+          
+          // Take top 4 places by rating
+          const topRated = places
+            .sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
+            .slice(0, 4)
+            .map((place: any) => {
+              console.log('Processing place:', place.name, 'Photos:', place.photos);
+              return {
+                id: place.id || place.place_id,
+                place_id: place.place_id || place.id,
+                name: place.name,
+                address: place.vicinity || 'Address not available',
+                rating: place.rating || 0,
+                price_level: place.price_range || '$$',
+                distance: place.distance || 0,
+                photos: place.photos || [],
+                lat: place.lat,
+                lng: place.lng
+              };
+            });
+          
+          console.log('Processed top places:', topRated);
+          setTopPlaces(topRated);
+        } else {
+          console.error('API returned error:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+        }
+      } catch (error) {
+        console.error('Error fetching top places:', error);
+        // Fallback to sample data if API fails
+        setTopPlaces([
+          {
+            id: '1',
+            place_id: '1',
+            name: 'Matcha-Ya',
+            address: 'NW.05/10 Steam Mill La, Haymarket',
+            rating: 4.8,
+            price_level: '$$',
+            distance: 0.8,
+            lat: -33.8688,
+            lng: 151.2093
+          },
+          {
+            id: '2',
+            place_id: '2',
+            name: 'Zensation Tea House',
+            address: 'Shop 82/788 Bourke St, Waterloo',
+            rating: 4.9,
+            price_level: '$$',
+            distance: 2.0,
+            lat: -33.9014,
+            lng: 151.2076
+          },
+          {
+            id: '3',
+            place_id: '3',
+            name: 'Oh!Matcha',
+            address: 'Shop 11/501 George St, Sydney',
+            rating: 4.7,
+            price_level: '$',
+            distance: 0.4,
+            lat: -33.8728,
+            lng: 151.2062
+          },
+          {
+            id: '4',
+            place_id: '4',
+            name: 'Cafe Maru',
+            address: '189 Kent St, Sydney',
+            rating: 4.9,
+            price_level: '$$',
+            distance: 0.5,
+            lat: -33.8705,
+            lng: 151.2047
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopPlaces();
+  }, [userLocation]);
 
   // Auto-rotate every 4 seconds
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || topPlaces.length === 0) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % topPlaces.length);
@@ -89,8 +173,8 @@ const TopPlacesCarousel: React.FC = () => {
   const openInGoogleMaps = (place: TopPlace) => {
     try {
       // Priority 1: Use place_id if available (shows full business profile)
-      if (place.id && place.id.startsWith('ChIJ')) {
-        const url = `https://www.google.com/maps/place/?q=place_id:${place.id}`;
+      if (place.place_id && place.place_id.startsWith('ChIJ')) {
+        const url = `https://www.google.com/maps/place/?q=place_id:${place.place_id}`;
         window.open(url, '_blank');
         return;
       }
@@ -103,122 +187,188 @@ const TopPlacesCarousel: React.FC = () => {
         return;
       }
       
-      // Priority 3: Fallback to coordinates (least preferred)
+      // Priority 3: Use coordinates if available
       if (place.lat && place.lng) {
         const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
         window.open(url, '_blank');
         return;
       }
       
-      // Last resort: open Google Maps homepage
+      // Fallback: open Google Maps
       window.open('https://www.google.com/maps', '_blank');
-      
     } catch (error) {
       console.error('Error opening Google Maps:', error);
       window.open('https://www.google.com/maps', '_blank');
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-green-600">Loading top places...</p>
+          {userLocation && (
+            <p className="text-xs text-gray-500 mt-2">
+              Location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (topPlaces.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No places available at the moment.</p>
+        {userLocation && (
+          <p className="text-xs text-gray-500 mt-2">
+            Location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   const currentPlace = topPlaces[currentIndex];
 
   return (
-    <div className="relative bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 shadow-lg border border-green-200">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <div className="flex items-center justify-center space-x-2 mb-2">
-          <Star className="w-6 h-6 text-yellow-500 fill-current" />
-          <h3 className="text-2xl font-bold text-gray-800">Top Rated Places</h3>
-          <Star className="w-6 h-6 text-yellow-500 fill-current" />
+    <div className="relative max-w-2xl mx-auto">
+      {/* Location Info */}
+      {userLocation && (
+        <div className="text-center mb-4">
+          <p className="text-sm text-gray-600">
+            📍 Showing places near your location
+          </p>
+          <div className="flex justify-center space-x-2 mt-2">
+            <button
+              onClick={() => {
+                setUserLocation({ lat: -33.8688, lng: 151.2093 }); // Sydney
+                setLoading(true);
+              }}
+              className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+            >
+              Test Sydney
+            </button>
+            <button
+              onClick={() => {
+                setUserLocation({ lat: 37.7749, lng: -122.4194 }); // San Francisco
+                setLoading(true);
+              }}
+              className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200"
+            >
+              Test SF
+            </button>
+          </div>
         </div>
-        <p className="text-gray-600">Discover Sydney's finest matcha experiences</p>
+      )}
+
+      {/* Navigation Dots */}
+      <div className="flex justify-center space-x-2 mb-6">
+        {topPlaces.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              setCurrentIndex(index);
+              setIsAutoPlaying(false);
+              setTimeout(() => setIsAutoPlaying(true), 10000);
+            }}
+            className={`w-3 h-3 rounded-full transition-all ${
+              index === currentIndex ? 'bg-green-600 w-8' : 'bg-green-300'
+            }`}
+          />
+        ))}
       </div>
 
-      {/* Carousel Container */}
-      <div className="relative overflow-hidden rounded-xl bg-white shadow-lg">
-        {/* Main Place Card */}
-        <div 
-          className="p-6 cursor-pointer transform transition-all duration-500 hover:scale-105"
-          onClick={() => openInGoogleMaps(currentPlace)}
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h4 className="text-xl font-bold text-gray-800 mb-2">{currentPlace.name}</h4>
-              <p className="text-gray-600 flex items-center mb-3">
-                <MapPin className="w-4 h-4 mr-2 text-green-600" />
-                {currentPlace.address}
-              </p>
+      {/* Main Card - Fixed Dimensions */}
+      <div 
+        className="bg-white rounded-2xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 w-full h-[500px] flex flex-col"
+        onClick={() => openInGoogleMaps(currentPlace)}
+      >
+        {/* Photo Section - Fixed Height */}
+        <div className="relative h-64 w-full overflow-hidden">
+          {currentPlace.photos && currentPlace.photos.length > 0 ? (
+            <img
+              src={currentPlace.photos[0]}
+              alt={currentPlace.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.log('Image failed to load, using fallback');
+                const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d'];
+                const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
+                (e.currentTarget as HTMLImageElement).src =
+                  `https://via.placeholder.com/400x256/${randomColor}/ffffff?text=${encodeURIComponent(currentPlace.name)}`;
+              }}
+              onLoad={() => console.log('Image loaded successfully:', currentPlace.photos?.[0])}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center">
+              <div className="text-center">
+                <Coffee className="w-20 h-20 text-green-600 mx-auto mb-3" />
+                <p className="text-xl font-semibold text-green-700">{currentPlace.name}</p>
+                <p className="text-sm text-green-600 mt-2">No photo available</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full flex items-center">
-                <Star className="w-4 h-4 mr-1 fill-current" />
-                <span className="font-semibold">{currentPlace.rating}</span>
-              </div>
-              <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full">
-                <span className="font-semibold">{currentPlace.price_level}</span>
-              </div>
+          )}
+          
+          {/* Price Badge - Top Right */}
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
+            <span className="text-sm font-semibold text-green-700">{currentPlace.price_level}</span>
+          </div>
+          
+          {/* Rating Badge - Top Left */}
+          <div className="absolute top-4 left-4 bg-yellow-100/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
+            <div className="flex items-center space-x-1">
+              <Star className="w-4 h-4 text-yellow-500 fill-current" />
+              <span className="text-sm font-semibold text-yellow-700">{currentPlace.rating}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Section - Fixed Height */}
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          {/* Top Content */}
+          <div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3 line-clamp-2">{currentPlace.name}</h3>
+            
+            <div className="flex items-center space-x-2 text-gray-600 mb-3">
+              <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-sm line-clamp-2">{currentPlace.address}</span>
             </div>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                <span className="text-sm font-medium">{currentPlace.distance}km away</span>
-              </div>
-              <div className="flex items-center space-x-1 text-green-600">
-                <Coffee className="w-4 h-4" />
-                <span className="text-sm font-medium">Matcha Specialists</span>
-              </div>
+          {/* Bottom Content */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                {currentPlace.distance} km away
+              </span>
             </div>
-            <div className="text-green-600 text-sm font-medium">
-              Click to open in Maps →
+            
+            <div className="text-center">
+              <span className="text-xs text-green-600 font-medium bg-green-50 px-3 py-2 rounded-full">
+                Click to open in Google Maps →
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* Navigation Dots */}
-        <div className="flex justify-center space-x-2 p-4 bg-gray-50">
-          {topPlaces.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setCurrentIndex(index);
-                setIsAutoPlaying(false);
-                setTimeout(() => setIsAutoPlaying(true), 10000);
-              }}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-green-500 scale-125' 
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
         </div>
       </div>
 
       {/* Navigation Arrows */}
       <button
         onClick={prevPlace}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-600 hover:text-green-600 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all hover:scale-110"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="w-6 h-6 text-green-600" />
       </button>
       
       <button
         onClick={nextPlace}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-600 hover:text-green-600 p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all hover:scale-110"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="w-6 h-6 text-green-600" />
       </button>
-
-      {/* Auto-play Indicator */}
-      <div className="text-center mt-4">
-        <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
-          <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-            isAutoPlaying ? 'bg-green-500' : 'bg-gray-300'
-          }`} />
-          <span>{isAutoPlaying ? 'Auto-rotating' : 'Manual control'}</span>
-        </div>
-      </div>
     </div>
   );
 };

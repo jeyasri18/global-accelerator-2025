@@ -73,8 +73,25 @@ class PlacesView(View):
                 if not location.get('lat') or not location.get('lng'):
                     continue  # Skip places without coordinates
                 
-                # Calculate match score based on rating and relevance
-                match_score = self.calculate_match_score(place, user_lat, user_lng)
+                # Get current time for time-based scoring
+                from datetime import datetime
+                current_hour = datetime.now().hour
+                
+                # Create user context for advanced scoring
+                user_context = {
+                    'hour': current_hour,
+                    'sentiment': request.GET.get('sentiment', 'neutral'),
+                    'preferences': {
+                        'budget': request.GET.get('budget', 'medium'),
+                        'vibe': request.GET.get('vibe', 'any'),
+                        'special_needs': request.GET.get('special_needs', '').split(',') if request.GET.get('special_needs') else []
+                    },
+                    'special_occasion': request.GET.get('special_occasion', 'none'),
+                    'weather': request.GET.get('weather', 'sunny')
+                }
+                
+                # Calculate advanced match score
+                match_score = self.calculate_match_score(place, user_lat, user_lng, user_context)
                 
                 # Calculate distance
                 distance = self.calculate_distance(
@@ -113,27 +130,129 @@ class PlacesView(View):
                 'message': str(e)
             }, status=500)
     
-    def calculate_match_score(self, place, user_lat, user_lng):
+    def calculate_match_score(self, place, user_lat, user_lng, user_context=None):
         """
-        Calculate match score based on various factors
-        This is where you can implement your matching algorithm
+        Advanced match scoring that considers multiple factors for intelligent recommendations
         """
         score = 0
+        user_context = user_context or {}
         
-        # Base score from rating (0-40 points)
+        # Base score from rating (0-30 points)
         rating = place.get('rating', 0)
         if rating > 0:
-            score += min(40, rating * 8)  # Max 40 points for 5-star rating
-        
-        # Bonus for matcha-related keywords in name (0-30 points)
-        name = place.get('name', '').lower()
-        matcha_keywords = ['matcha', 'green tea', 'tea house', 'tea room']
-        for keyword in matcha_keywords:
-            if keyword in name:
+            # Exponential rating boost - 4.5+ gets much higher scores
+            if rating >= 4.8:
+                score += 30
+            elif rating >= 4.5:
+                score += 25
+            elif rating >= 4.0:
+                score += 20
+            elif rating >= 3.5:
+                score += 15
+            else:
                 score += 10
-                break
         
-        # Distance factor (0-20 points, closer is better)
+        # Sentiment-based scoring (0-25 points)
+        sentiment = user_context.get('sentiment', 'neutral')
+        place_name = place.get('name', '').lower()
+        place_types = place.get('types', [])
+        
+        if sentiment in ['stressed', 'tired', 'calm']:
+            # Quiet, peaceful places for stressed users
+            quiet_keywords = ['zen', 'quiet', 'peaceful', 'calm', 'serene', 'tranquil']
+            if any(keyword in place_name for keyword in quiet_keywords):
+                score += 20
+            if 'park' in place_types or 'garden' in place_types:
+                score += 15
+            if place.get('rating', 0) >= 4.5:  # High-rated peaceful places
+                score += 10
+                
+        elif sentiment in ['excited', 'happy', 'social']:
+            # Lively, social places for excited users
+            social_keywords = ['social', 'bar', 'rooftop', 'trendy', 'vibrant', 'lively']
+            if any(keyword in place_name for keyword in social_keywords):
+                score += 20
+            if 'bar' in place_types or 'nightclub' in place_types:
+                score += 15
+            if place.get('price_level', 2) in [2, 3]:  # Social price range
+                score += 10
+                
+        elif sentiment in ['focused', 'study', 'work']:
+            # Quiet, focused places for work/study
+            work_keywords = ['study', 'work', 'focus', 'quiet', 'concentration', 'library']
+            if any(keyword in place_name for keyword in work_keywords):
+                score += 20
+            if 'library' in place_types or 'cafe' in place_types:
+                score += 15
+            if place.get('wifi', False):  # Assuming wifi availability
+                score += 10
+        
+        # Time-based scoring (0-20 points)
+        current_hour = user_context.get('hour', 12)  # Default to noon
+        if 6 <= current_hour <= 11:  # Morning (6 AM - 11 AM)
+            if 'breakfast' in place_types or 'coffee' in place_types:
+                score += 20
+            if 'bakery' in place_types:
+                score += 15
+        elif 11 <= current_hour <= 16:  # Lunch (11 AM - 4 PM)
+            if 'restaurant' in place_types or 'cafe' in place_types:
+                score += 20
+            if 'lunch' in place_types:
+                score += 15
+        elif 16 <= current_hour <= 21:  # Afternoon/Evening (4 PM - 9 PM)
+            if 'dinner' in place_types or 'bar' in place_types:
+                score += 20
+            if 'rooftop' in place_types:
+                score += 15
+        elif 21 <= current_hour or current_hour <= 2:  # Night (9 PM - 2 AM)
+            if 'bar' in place_types or 'nightclub' in place_types:
+                score += 20
+            if 'late_night' in place_types:
+                score += 15
+        
+        # User preference matching (0-20 points)
+        user_preferences = user_context.get('preferences', {})
+        
+        # Budget preferences
+        budget = user_preferences.get('budget', 'medium')
+        price_level = place.get('price_level', 2)
+        if budget == 'low' and price_level <= 1:
+            score += 20
+        elif budget == 'medium' and price_level in [1, 2]:
+            score += 20
+        elif budget == 'high' and price_level >= 3:
+            score += 20
+        
+        # Atmosphere preferences
+        vibe = user_preferences.get('vibe', 'any')
+        if vibe == 'cozy' and any(word in place_name for word in ['cozy', 'warm', 'intimate']):
+            score += 20
+        elif vibe == 'trendy' and any(word in place_name for word in ['trendy', 'modern', 'hip']):
+            score += 20
+        elif vibe == 'quiet' and any(word in place_name for word in ['quiet', 'peaceful', 'serene']):
+            score += 20
+        
+        # Special needs
+        special_needs = user_preferences.get('special_needs', [])
+        if 'wifi' in special_needs and place.get('wifi', False):
+            score += 15
+        if 'outdoor_seating' in special_needs and 'outdoor_seating' in place_types:
+            score += 15
+        if 'accessible' in special_needs and 'wheelchair_accessible' in place_types:
+            score += 15
+        
+        # Matcha-specific scoring (0-15 points)
+        matcha_keywords = ['matcha', 'green tea', 'tea house', 'tea room', 'japanese', 'asian']
+        matcha_score = 0
+        for keyword in matcha_keywords:
+            if keyword in place_name.lower():
+                matcha_score += 5
+                break
+        if 'matcha' in place_name.lower():
+            matcha_score += 10  # Bonus for explicit matcha mention
+        score += min(15, matcha_score)
+        
+        # Distance factor (0-15 points, closer is better)
         try:
             # Handle different possible data structures
             if 'geometry' in place and 'location' in place['geometry']:
@@ -150,21 +269,37 @@ class PlacesView(View):
         except Exception as e:
             print(f"Error calculating distance: {e}")
             distance = 5.0  # Default distance
-        if distance <= 1:  # Within 1 mile
-            score += 20
-        elif distance <= 3:  # Within 3 miles
+        
+        # Smart distance scoring based on context
+        if distance <= 0.5:  # Within 0.5 miles - very convenient
             score += 15
-        elif distance <= 5:  # Within 5 miles
+        elif distance <= 1.0:  # Within 1 mile - convenient
+            score += 12
+        elif distance <= 2.0:  # Within 2 miles - acceptable
+            score += 8
+        elif distance <= 3.0:  # Within 3 miles - okay for special places
+            score += 5
+        else:  # Beyond 3 miles - only for exceptional places
+            score += 2
+        
+        # Special occasion bonuses (0-10 points)
+        special_occasion = user_context.get('special_occasion', 'none')
+        if special_occasion == 'date' and 'romantic' in place_types:
+            score += 10
+        elif special_occasion == 'birthday' and 'celebration' in place_types:
+            score += 10
+        elif special_occasion == 'meeting' and 'quiet' in place_types:
             score += 10
         
-        # Price level factor (0-10 points, moderate prices preferred)
-        price_level = place.get('price_level', 2)
-        if price_level in [2, 3]:  # Moderate to expensive
-            score += 10
-        elif price_level in [1, 4]:  # Cheap or very expensive
+        # Weather consideration (0-5 points)
+        weather = user_context.get('weather', 'sunny')
+        if weather == 'rainy' and 'indoor' in place_types:
+            score += 5
+        elif weather == 'sunny' and 'outdoor_seating' in place_types:
             score += 5
         
-        return min(100, max(0, int(score)))  # Ensure 0-100 range
+        # Ensure score is within 0-200 range and return as integer
+        return min(200, max(0, int(score)))
     
     def calculate_distance(self, lat1, lng1, lat2, lng2):
         """Calculate distance between two points in miles"""
@@ -198,7 +333,7 @@ class PlacesView(View):
         return price_map.get(price_level, "Price not available")
     
     def get_photo_urls(self, photos):
-        """Extract photo URLs from place photos with better fallbacks"""
+        """Extract photo URLs from place photos using photo_reference"""
         photo_urls = []
         
         if not photos:
@@ -208,7 +343,7 @@ class PlacesView(View):
             photo_reference = photo.get('photo_reference')
             if photo_reference:
                 try:
-                    # Try to construct photo URL with API key
+                    # Construct photo URL with API key
                     from django.conf import settings
                     api_key = getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
                     
@@ -216,7 +351,7 @@ class PlacesView(View):
                         photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={api_key}"
                         photo_urls.append(photo_url)
                     else:
-                        # If no API key, skip this photo - frontend will handle fallback
+                        print("Warning: No Google Maps API key found for photos")
                         continue
                 except Exception as e:
                     print(f"Error constructing photo URL: {e}")

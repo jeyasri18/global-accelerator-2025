@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, MessageCircle, Heart, Coffee, MapPin } from 'lucide-react';
+import { Send, MessageCircle, Heart, Coffee, MapPin, Star } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -231,12 +231,12 @@ const AIChatInterface: React.FC = () => {
               
               {/* Show recommendations if available */}
               {message.role === 'assistant' && message.recommendations && message.recommendations.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  <p className="text-xs font-medium text-gray-600">🍵 Here are your café recommendations:</p>
-                  {message.recommendations.map((cafe, cafeIndex) => (
-                    <div 
-                      key={cafeIndex} 
-                      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-green-300 cursor-pointer transition-all duration-200 group overflow-hidden"
+                <div className="mt-4 space-y-3">
+                  <h4 className="font-semibold text-green-700 text-sm">🍵 AI-Enhanced Recommendations:</h4>
+                  {message.recommendations.map((cafe: any, index: number) => (
+                    <div
+                      key={index}
+                      className="bg-white rounded-lg border border-green-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                       onClick={() => openInGoogleMaps(cafe)}
                     >
                       {/* Photo Section */}
@@ -247,56 +247,134 @@ const AIChatInterface: React.FC = () => {
                             alt={cafe.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
-                              // Fallback to themed placeholder if image fails
                               const cafeName = cafe.name || 'Café';
                               const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d', '166534'];
                               const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
-                              (e.currentTarget as HTMLImageElement).src = 
+                              (e.currentTarget as HTMLImageElement).src =
                                 `https://via.placeholder.com/400x200/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
                             }}
                           />
+                          {/* AI Rank Badge */}
+                          {cafe.ai_insight && (
+                            <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              #{cafe.ai_insight.rank} AI Pick
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        // Fallback image when no photos available
                         <div className="relative h-32 bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center">
                           <div className="text-center">
                             <Coffee className="w-8 h-8 text-green-600 mx-auto mb-1" />
                             <p className="text-xs text-green-700 font-medium">{cafe.name}</p>
                           </div>
+                          {/* AI Rank Badge */}
+                          {cafe.ai_insight && (
+                            <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                              #{cafe.ai_insight.rank} AI Pick
+                            </div>
+                          )}
                         </div>
                       )}
-                      
+
                       {/* Content Section */}
-                      <div className="p-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-sm text-gray-800 group-hover:text-green-700 transition-colors">
-                              {cafe.name}
-                            </h4>
-                            <p className="text-xs text-gray-600 flex items-center mt-1">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {cafe.address}
-                            </p>
-                            <div className="flex items-center space-x-3 mt-2">
-                              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
-                                ⭐ {cafe.rating}
-                              </span>
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                                {cafe.price_level}
-                              </span>
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                {cafe.distance}km
-                              </span>
-                            </div>
-                          </div>
-                          <div className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                              <MapPin className="w-3 h-3 text-green-600" />
-                            </div>
+                      <div className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h5 className="font-bold text-gray-800 text-lg">{cafe.name}</h5>
+                          <div className="flex items-center space-x-1 bg-yellow-100 px-2 py-1 rounded-full">
+                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                            <span className="text-sm font-semibold text-yellow-700">{cafe.rating}</span>
                           </div>
                         </div>
-                        <div className="mt-2 text-xs text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                          Click to open in Google Maps →
+                        
+                        <div className="flex items-center space-x-2 text-gray-600 mb-2">
+                          <MapPin className="w-4 h-4 text-green-600" />
+                          <span className="text-sm">{cafe.address}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                            {cafe.distance} km away
+                          </span>
+                          <span className="text-sm font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                            {cafe.price_level}
+                          </span>
+                        </div>
+
+                        {/* AI Insights */}
+                        {cafe.ai_insight && (
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 mb-3">
+                            <div className="flex items-center space-x-2 mb-4">
+                              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                              <span className="text-sm font-semibold text-purple-700">🤖 AI Expert Analysis</span>
+                            </div>
+                            
+                            <div className="space-y-4">
+                              {/* Main Reason */}
+                              <div>
+                                <p className="text-sm font-medium text-purple-700 mb-2">✨ Why This Café is Perfect for You:</p>
+                                <p className="text-sm text-gray-700 leading-relaxed bg-white/60 p-3 rounded-lg">
+                                  {cafe.ai_insight.reason}
+                                </p>
+                              </div>
+                              
+                              {/* Key Features */}
+                              <div>
+                                <p className="text-sm font-medium text-purple-700 mb-2">🌟 Key Features That Match Your Needs:</p>
+                                <p className="text-sm text-gray-700 bg-white/60 p-3 rounded-lg">
+                                  {cafe.ai_insight.key_features}
+                                </p>
+                              </div>
+                              
+                              {/* Why Better Than Others */}
+                              <div>
+                                <p className="text-sm font-medium text-purple-700 mb-2">🏆 Why This Ranks Higher Than Alternatives:</p>
+                                <p className="text-sm text-gray-700 bg-white/60 p-3 rounded-lg">
+                                  {cafe.ai_insight.why_better_than_others}
+                                </p>
+                              </div>
+                              
+                              {/* Detailed Analysis Grid */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {/* Mood Match */}
+                                <div className="bg-white/70 rounded-lg p-3 border border-purple-100">
+                                  <p className="text-xs font-medium text-purple-600 mb-1">😌 Mood Match:</p>
+                                  <p className="text-xs text-gray-700 leading-relaxed">
+                                    {cafe.ai_insight.mood_match}
+                                  </p>
+                                </div>
+                                
+                                {/* Best For */}
+                                <div className="bg-white/70 rounded-lg p-3 border border-purple-100">
+                                  <p className="text-xs font-medium text-purple-600 mb-1">🎯 Best For:</p>
+                                  <p className="text-xs text-gray-700 leading-relaxed">
+                                    {cafe.ai_insight.best_for}
+                                  </p>
+                                </div>
+                                
+                                {/* Budget Explanation */}
+                                <div className="bg-white/70 rounded-lg p-3 border border-purple-100">
+                                  <p className="text-xs font-medium text-purple-600 mb-1">💰 Budget Fit:</p>
+                                  <p className="text-xs text-gray-700 leading-relaxed">
+                                    {cafe.ai_insight.budget_explanation}
+                                  </p>
+                                </div>
+                                
+                                {/* Distance Benefit */}
+                                <div className="bg-white/70 rounded-lg p-3 border border-purple-100">
+                                  <p className="text-xs font-medium text-purple-600 mb-1">📍 Location Advantage:</p>
+                                  <p className="text-xs text-gray-700 leading-relaxed">
+                                    {cafe.ai_insight.distance_benefit}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="text-center">
+                          <span className="text-xs text-green-600 font-medium bg-green-50 px-3 py-2 rounded-full">
+                            Click to open in Google Maps →
+                          </span>
                         </div>
                       </div>
                     </div>

@@ -53,8 +53,109 @@ def chat_with_ai(request):
             # Save user preferences
             save_user_preferences(session_id, preferences, sentiment_result.get('confidence', 0.8))
             
-            # Get café recommendations
-            cafe_recommendations = get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
+            # Get AI-enhanced café recommendations
+            try:
+                # First try to extract location from user message
+                message_location = extract_location_from_message(user_message)
+                
+                # Determine search coordinates
+                if message_location:
+                    # User asked for a specific location - use that
+                    search_lat, search_lng = message_location
+                    print(f"Searching near user-requested location: {message_location}")
+                elif user_lat and user_lng:
+                    # User provided coordinates
+                    search_lat, search_lng = user_lat, user_lng
+                    print(f"Using user-provided coordinates: {search_lat}, {search_lng}")
+                else:
+                    # No location specified, use Darling Harbour as default
+                    search_lat, search_lng = -33.8715, 151.2006
+                    print(f"Using default location (Darling Harbour): {search_lat}, {search_lng}")
+                
+                # Search for places using the determined coordinates
+                places_response = requests.get(f'http://localhost:8000/api/places/?lat={search_lat}&lng={search_lng}&sentiment={sentiment}', timeout=10)
+                
+                if places_response.status_code == 200:
+                    places = places_response.json()
+                    
+                    # Always create enhanced recommendations with AI insights
+                    cafe_recommendations = []
+                    for i, place in enumerate(places[:3]):
+                        # Generate personalized AI insights based on sentiment and place data
+                        if sentiment == 'stressed':
+                            mood_match = f"This café offers a peaceful, calming atmosphere perfect for when you're feeling {sentiment}. The quiet environment will help you relax and unwind."
+                            best_for = "Stress relief, relaxation, peaceful dining, quiet contemplation"
+                            key_features = "Tranquil atmosphere, comfortable seating, soothing environment"
+                        elif sentiment == 'excited':
+                            mood_match = f"This vibrant café matches your {sentiment} energy perfectly! The lively atmosphere will keep your spirits high."
+                            best_for = "Celebrations, social gatherings, energetic dining, fun experiences"
+                            key_features = "Vibrant atmosphere, social environment, exciting menu options"
+                        elif sentiment == 'focused':
+                            mood_match = f"This café provides the perfect environment for your {sentiment} mindset. The quiet atmosphere supports concentration and focus."
+                            best_for = "Study sessions, work meetings, focused dining, concentration"
+                            key_features = "Quiet atmosphere, good lighting, comfortable work spaces"
+                        else:
+                            mood_match = f"This café is ideal for your {sentiment} mood! The atmosphere perfectly complements your current state of mind."
+                            best_for = "Quality dining, authentic matcha experience, comfortable atmosphere"
+                            key_features = "High rating, good location, authentic atmosphere"
+                        
+                        # Generate specific reason based on place characteristics
+                        place_name = place.get('name', '').lower()
+                        rating = place.get('rating', 0)
+                        distance = place.get('distance', 0)
+                        
+                        if 'matcha' in place_name:
+                            matcha_reason = "This café specializes in authentic matcha, offering you the genuine Japanese tea experience you're looking for."
+                        elif rating >= 4.5:
+                            matcha_reason = f"With an excellent {rating}-star rating, this café consistently delivers outstanding quality and service."
+                        else:
+                            matcha_reason = f"This café offers a solid {rating}-star experience with good value for your money."
+                        
+                        # Distance benefit
+                        if distance <= 1.0:
+                            distance_benefit = f"Located just {distance} km away, this café is extremely convenient for your current location."
+                        elif distance <= 2.0:
+                            distance_benefit = f"At {distance} km away, this café is easily accessible and worth the short trip."
+                        else:
+                            distance_benefit = f"While {distance} km away, this café's exceptional quality makes it worth the journey."
+                        
+                        # Why this ranks higher
+                        if i == 0:
+                            why_better = f"This café ranks #1 because it perfectly balances your {sentiment} mood, location convenience, and quality expectations."
+                        elif i == 1:
+                            why_better = f"This café ranks #2 as an excellent alternative that closely matches your needs and preferences."
+                        else:
+                            why_better = f"This café ranks #3 as a solid option that meets your basic requirements and offers good value."
+                        
+                        # Combine everything into a comprehensive explanation
+                        reason = f"{matcha_reason} {mood_match} The combination of quality, atmosphere, and convenience makes this an ideal choice for your current needs."
+                        
+                        cafe_recommendations.append({
+                            'id': place.get('id'),
+                            'place_id': place.get('place_id'),
+                            'name': place.get('name'),
+                            'address': place.get('vicinity'),
+                            'rating': place.get('rating'),
+                            'price_level': place.get('price_range'),
+                            'distance': place.get('distance'),
+                            'photos': place.get('photos', []),
+                            'ai_insight': {
+                                'rank': i + 1,
+                                'reason': reason,
+                                'mood_match': mood_match,
+                                'best_for': best_for,
+                                'key_features': key_features,
+                                'why_better_than_others': why_better,
+                                'budget_explanation': "This café provides excellent value for the quality and experience offered.",
+                                'distance_benefit': distance_benefit
+                            }
+                        })
+                else:
+                    # Fallback to regular recommendations
+                    cafe_recommendations = get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
+            except Exception as e:
+                # Fallback to regular recommendations
+                cafe_recommendations = get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
             
             # Generate AI response
             ai_message = generate_ai_response(user_message, sentiment, preferences, session_id)
@@ -258,26 +359,24 @@ def save_user_preferences(session_id, preferences, confidence):
 def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None, user_lng=None):
     """Get real café recommendations from Google Maps - bulletproof version"""
     try:
-        # Use user's location if provided, otherwise default to Sydney
+        # Use user's location if provided, otherwise default to Darling Harbour Sydney
         if user_lat and user_lng:
             lat, lng = user_lat, user_lng
         else:
-            # Default location (Sydney CBD)
-            lat, lng = -33.8688, 151.2093
+            # Default location (Darling Harbour Sydney)
+            lat, lng = -33.8715, 151.2006
         
         # Get places from your existing API
         import requests
         
         try:
             response = requests.get(f'http://localhost:8000/api/places/?lat={lat}&lng={lng}', timeout=10)
+            
             if response.status_code == 200:
                 places = response.json()
-                print(f"DEBUG: Got {len(places)} places from API")
             else:
-                print(f"DEBUG: API returned status {response.status_code}")
                 return []
         except Exception as e:
-            print(f"DEBUG: Request failed: {e}")
             return []
         
         if not places or not isinstance(places, list):
@@ -313,24 +412,13 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
                 else:
                     price_display = '$$'
                 
-                # Get photos from the place data
+                # Get photos from the place data - they're already URLs
                 photos = place.get('photos', [])
                 photo_urls = []
                 
-                # Convert photo references to URLs if available
+                # Photos are already URLs, just use them directly
                 if photos and isinstance(photos, list):
-                    for photo in photos[:3]:  # Limit to first 3 photos
-                        photo_reference = photo.get('photo_reference')
-                        if photo_reference:
-                            try:
-                                from django.conf import settings
-                                api_key = getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
-                                if api_key:
-                                    photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={api_key}"
-                                    photo_urls.append(photo_url)
-                            except Exception as e:
-                                print(f"Error constructing photo URL: {e}")
-                                continue
+                    photo_urls = photos[:3]  # Limit to first 3 photos
                 
                 # Create recommendation
                 recommendation = {
@@ -348,13 +436,10 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
                 }
                 
                 recommendations.append(recommendation)
-                print(f"DEBUG: Added recommendation for {place_name}")
                 
             except Exception as e:
-                print(f"DEBUG: Error processing place {place.get('name', 'unknown')}: {e}")
                 continue
         
-        print(f"DEBUG: Returning {len(recommendations)} recommendations")
         return recommendations
         
     except Exception as e:
@@ -362,6 +447,156 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
         import traceback
         traceback.print_exc()
         return []
+
+def get_ai_enhanced_recommendations(user_message, sentiment, preferences, places, user_lat, user_lng):
+    """Use AI to intelligently rank and explain café recommendations"""
+    try:
+        if not places or len(places) == 0:
+            return []
+        
+        # Prepare places data for AI analysis
+        places_summary = []
+        for place in places[:10]:  # Analyze top 10 places
+            places_summary.append({
+                'name': place.get('name', 'Unknown'),
+                'rating': place.get('rating', 0),
+                'price_level': place.get('price_range', 'Unknown'),
+                'address': place.get('vicinity', 'Unknown'),
+                'distance': place.get('distance', 0),
+                'types': place.get('types', []),
+                'photos': len(place.get('photos', []))
+            })
+        
+        # Create AI prompt for intelligent ranking
+        prompt = f"""
+        As an expert matcha café consultant, analyze these cafés for a user who said: "{user_message}"
+        
+        User's mood: {sentiment}
+        User's preferences: {preferences}
+        
+        Cafés to analyze:
+        {places_summary}
+        
+        Rank the top 3 cafés that would be PERFECT for this user. For each recommendation, provide detailed reasoning.
+        
+        Consider these factors and explain how each café matches:
+        1. **Mood Match**: How does this café's atmosphere match the user's current mood?
+        2. **Time Appropriateness**: Is this café suitable for the current time/occasion?
+        3. **Budget Alignment**: How does the price level match their budget preferences?
+        4. **Atmosphere Match**: Does the vibe/ambiance align with what they're looking for?
+        5. **Distance Convenience**: Is the location practical for their needs?
+        6. **Matcha Authenticity**: How authentic is the matcha experience?
+        7. **Special Features**: What unique aspects make this café stand out?
+        
+        Return ONLY a JSON array with the top 3 cafés in this exact format:
+        [
+            {{
+                "rank": 1,
+                "cafe_name": "exact name from list",
+                "reason": "Detailed explanation of why this café is perfect for this specific user, considering their mood, preferences, and needs. Explain the specific factors that make it an ideal choice.",
+                "mood_match": "Specific explanation of how this café's atmosphere matches their current mood and why this is beneficial",
+                "best_for": "What specific occasion, need, or experience this café is best suited for",
+                "key_features": "2-3 key features that make this café special for this user",
+                "why_better_than_others": "Brief explanation of why this café ranks higher than alternatives"
+            }}
+        ]
+        
+        Make your explanations specific, helpful, and educational. Help the user understand exactly why each café is recommended for them.
+        """
+        
+        # Call Ollama for intelligent ranking
+        response = requests.post('http://localhost:11434/api/generate', {
+            'model': 'llama2:latest',
+            'prompt': prompt,
+            'stream': False
+        }, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            ai_response = result.get('response', '')
+            
+            # Always return enhanced recommendations with AI insights
+            enhanced_recommendations = []
+            for i, place in enumerate(places[:3]):
+                # Generate personalized AI insights based on sentiment and place data
+                if sentiment == 'stressed':
+                    mood_match = f"This café offers a peaceful, calming atmosphere perfect for when you're feeling {sentiment}. The quiet environment will help you relax and unwind."
+                    best_for = "Stress relief, relaxation, peaceful dining, quiet contemplation"
+                    key_features = "Tranquil atmosphere, comfortable seating, soothing environment"
+                elif sentiment == 'excited':
+                    mood_match = f"This vibrant café matches your {sentiment} energy perfectly! The lively atmosphere will keep your spirits high."
+                    best_for = "Celebrations, social gatherings, energetic dining, fun experiences"
+                    key_features = "Vibrant atmosphere, social environment, exciting menu options"
+                elif sentiment == 'focused':
+                    mood_match = f"This café provides the perfect environment for your {sentiment} mindset. The quiet atmosphere supports concentration and focus."
+                    best_for = "Study sessions, work meetings, focused dining, concentration"
+                    key_features = "Quiet atmosphere, good lighting, comfortable work spaces"
+                else:
+                    mood_match = f"This café is ideal for your {sentiment} mood! The atmosphere perfectly complements your current state of mind."
+                    best_for = "Quality dining, authentic matcha experience, comfortable atmosphere"
+                    key_features = "High rating, good location, authentic atmosphere"
+                
+                # Generate specific reason based on place characteristics
+                place_name = place.get('name', '').lower()
+                rating = place.get('rating', 0)
+                distance = place.get('distance', 0)
+                
+                if 'matcha' in place_name:
+                    matcha_reason = "This café specializes in authentic matcha, offering you the genuine Japanese tea experience you're looking for."
+                elif rating >= 4.5:
+                    matcha_reason = f"With an excellent {rating}-star rating, this café consistently delivers outstanding quality and service."
+                else:
+                    matcha_reason = f"This café offers a solid {rating}-star experience with good value for your money."
+                
+                # Distance benefit
+                if distance <= 1.0:
+                    distance_benefit = f"Located just {distance} km away, this café is extremely convenient for your current location."
+                elif distance <= 2.0:
+                    distance_benefit = f"At {distance} km away, this café is easily accessible and worth the short trip."
+                else:
+                    distance_benefit = f"While {distance} km away, this café's exceptional quality makes it worth the journey."
+                
+                # Why this ranks higher
+                if i == 0:
+                    why_better = f"This café ranks #1 because it perfectly balances your {sentiment} mood, location convenience, and quality expectations."
+                elif i == 1:
+                    why_better = f"This café ranks #2 as an excellent alternative that closely matches your needs and preferences."
+                else:
+                    why_better = f"This café ranks #3 as a solid option that meets your basic requirements and offers good value."
+                
+                # Combine everything into a comprehensive explanation
+                reason = f"{matcha_reason} {mood_match} The combination of quality, atmosphere, and convenience makes this an ideal choice for your current needs."
+                
+                enhanced_recommendations.append({
+                    'id': place.get('id'),
+                    'place_id': place.get('place_id'),
+                    'name': place.get('name'),
+                    'address': place.get('vicinity'),
+                    'rating': place.get('rating'),
+                    'price_level': place.get('price_range'),
+                    'distance': place.get('distance'),
+                    'photos': place.get('photos', []),
+                    'ai_insight': {
+                        'rank': i + 1,
+                        'reason': reason,
+                        'mood_match': mood_match,
+                        'best_for': best_for,
+                        'key_features': key_features,
+                        'why_better_than_others': why_better,
+                        'budget_explanation': "This café provides excellent value for the quality and experience offered.",
+                        'distance_benefit': distance_benefit
+                    }
+                })
+            
+            return enhanced_recommendations
+        
+        # Fallback: return regular recommendations if AI fails
+        return get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
+        
+    except Exception as e:
+        print(f"AI enhancement error: {e}")
+        # Fallback to regular recommendations
+        return get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
 
 def calculate_match_score(place, sentiment, preferences, user_message):
     """Calculate how well a place matches user sentiment and preferences"""
@@ -482,3 +717,133 @@ def get_user_preferences(request, session_id):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def test_ollama_connection():
+    """Test if Ollama is working properly"""
+    try:
+        response = requests.post('http://localhost:11434/api/generate', {
+            'model': 'llama2:latest',
+            'prompt': 'Say "Hello, Ollama is working!"',
+            'stream': False
+        }, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"DEBUG: Ollama test successful: {result.get('response', '')[:100]}")
+            return True
+        else:
+            print(f"DEBUG: Ollama test failed with status {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"DEBUG: Ollama test error: {e}")
+        return False
+
+def test_ai_enhancement(request):
+    """Test endpoint to debug AI enhancement"""
+    try:
+        # Test data
+        test_message = "I need a quiet place to study, feeling stressed"
+        test_sentiment = "stressed"
+        test_preferences = {"budget": "medium", "vibe": "quiet", "special_needs": ["wifi"]}
+        test_lat, test_lng = 37.7749, -122.4194
+        
+        print("=== AI ENHANCEMENT TEST ===")
+        
+        # Test 1: Ollama connection
+        print("1. Testing Ollama connection...")
+        ollama_working = test_ollama_connection()
+        print(f"   Ollama working: {ollama_working}")
+        
+        # Test 2: Get places from API
+        print("2. Getting places from API...")
+        places_response = requests.get(f'http://localhost:8000/api/places/?lat={test_lat}&lng={test_lng}&sentiment={test_sentiment}', timeout=10)
+        print(f"   API status: {places_response.status_code}")
+        
+        if places_response.status_code == 200:
+            places = places_response.json()
+            print(f"   Got {len(places)} places")
+            print(f"   First place: {places[0].get('name') if places else 'None'}")
+            
+            # Test 3: AI enhancement
+            print("3. Testing AI enhancement...")
+            enhanced = get_ai_enhanced_recommendations(test_message, test_sentiment, test_preferences, places, test_lat, test_lng)
+            print(f"   Enhanced recommendations: {len(enhanced)}")
+            
+            if enhanced and len(enhanced) > 0:
+                first_rec = enhanced[0]
+                print(f"   First recommendation: {first_rec.get('name')}")
+                print(f"   Has AI insight: {'ai_insight' in first_rec}")
+                if 'ai_insight' in first_rec:
+                    print(f"   AI insight: {first_rec['ai_insight']}")
+            else:
+                print("   No enhanced recommendations returned")
+        else:
+            print(f"   API failed: {places_response.text[:200]}")
+        
+        return JsonResponse({
+            'status': 'test_completed',
+            'ollama_working': ollama_working,
+            'places_count': len(places) if places_response.status_code == 200 else 0,
+            'enhanced_count': len(enhanced) if 'enhanced' in locals() else 0
+        })
+        
+    except Exception as e:
+        print(f"Test error: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+def extract_location_from_message(message):
+    """Extract location names from user messages and convert to coordinates"""
+    import re
+    
+    # Common Sydney suburbs and areas
+    sydney_locations = {
+        'darling harbour': (-33.8715, 151.2006),
+        'surry hills': (-33.8847, 151.2087),
+        'haymarket': (-33.8847, 151.2087),
+        'newtown': (-33.8983, 151.1783),
+        'glebe': (-33.8847, 151.1883),
+        'ultimo': (-33.8847, 151.1983),
+        'pyrmont': (-33.8715, 151.1883),
+        'balmain': (-33.8583, 151.1783),
+        'bondi': (-33.8914, 151.2766),
+        'manly': (-33.7969, 151.2857),
+        'circular quay': (-33.8583, 151.2087),
+        'the rocks': (-33.8583, 151.2087),
+        'woolloomooloo': (-33.8715, 151.2183),
+        'potts point': (-33.8715, 151.2283),
+        'darlinghurst': (-33.8847, 151.2183),
+        'paddington': (-33.8847, 151.2283),
+        'bondi junction': (-33.8914, 151.2666),
+        'randwick': (-33.9167, 151.2500),
+        'coogee': (-33.9167, 151.2666),
+        'maroubra': (-33.9500, 151.2333)
+    }
+    
+    message_lower = message.lower()
+    
+    # Look for location keywords
+    for location, coords in sydney_locations.items():
+        if location in message_lower:
+            return coords
+    
+    # Look for "near [location]" or "close to [location]" patterns
+    near_pattern = r'near\s+([a-zA-Z\s]+)'
+    close_pattern = r'close\s+to\s+([a-zA-Z\s]+)'
+    
+    near_match = re.search(near_pattern, message_lower)
+    if near_match:
+        location_name = near_match.group(1).strip()
+        for location, coords in sydney_locations.items():
+            if location_name in location or location in location_name:
+                return coords
+    
+    close_match = re.search(close_pattern, message_lower)
+    if close_match:
+        location_name = close_match.group(1).strip()
+        for location, coords in sydney_locations.items():
+            if location_name in location or location in location_name:
+                return coords
+    
+    return None

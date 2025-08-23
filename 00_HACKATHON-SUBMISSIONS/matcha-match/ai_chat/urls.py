@@ -4,7 +4,6 @@ from . import views
 app_name = 'ai_chat'
 
 urlpatterns = [
-    path('chat/', views.chat_with_ai, name='chat'),
-    path('conversation/<str:session_id>/', views.get_conversation_history, name='conversation_history'),
-    path('preferences/<str:session_id>/', views.get_user_preferences, name='user_preferences'),
+    path('chat/', views.chat_with_ai, name='chat_with_ai'),
+    path('test-ai/', views.test_ai_enhancement, name='test_ai_enhancement'),
 ]
