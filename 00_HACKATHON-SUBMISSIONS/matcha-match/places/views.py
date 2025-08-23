@@ -223,6 +223,8 @@ class PlacesView(View):
                     continue
         
         return photo_urls
+    
+
 
 
 # urls.py (add this to your urlpatterns)
