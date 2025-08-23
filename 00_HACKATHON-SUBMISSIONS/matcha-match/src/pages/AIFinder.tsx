@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AIChatInterface from "@/components/AIChatInterface";
+import TopPlacesCarousel from "@/components/TopPlacesCarousel";
 import { Coffee, MessageCircle, MapPin, Star, Sparkles } from "lucide-react";
 
 export default function AIFinder() {
@@ -116,6 +117,11 @@ export default function AIFinder() {
               >
                 View All Matcha Spots
               </button>
+            </div>
+
+            {/* Top Places Carousel */}
+            <div className="mt-8">
+              <TopPlacesCarousel />
             </div>
 
             {/* Features */}

@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import ViewToggle from "@/components/ViewToggle";
 import ListView from "@/components/ListView";
 import MapView from "@/components/MapView"; // current MapView fetches its own data
+import TopPlacesCarousel from "@/components/TopPlacesCarousel";
 import { mockMatchaPlaces, MatchaPlace } from "@/data/mockMatcha";
 import { useToast } from "@/hooks/use-toast";
 
@@ -136,6 +137,11 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 py-6">
+        {/* Top Places Carousel */}
+        <div className="mb-8">
+          <TopPlacesCarousel />
+        </div>
+        
         <div className="flex justify-center mb-6 space-x-4">
           <ViewToggle currentView={currentView} onViewChange={setCurrentView} />
           <button
