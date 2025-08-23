@@ -17,10 +17,26 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   const rating =
     typeof place.rating === "number" ? place.rating : 0;
 
+  const openInGoogleMaps = () => {
+    try {
+      if (place.lat && place.lng) {
+        const url = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
+        window.open(url, '_blank');
+      } else if (place.name && (place.address || place.vicinity)) {
+        const searchQuery = encodeURIComponent(`${place.name} ${place.address || place.vicinity}`);
+        const url = `https://www.google.com/maps/search/${searchQuery}`;
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening Google Maps:', error);
+      window.open('https://www.google.com/maps', '_blank');
+    }
+  };
+
   const priceRange =
     place.priceRange ?? dollars(place.price_level);
 
-  const distanceMi =
+  const distanceKm =
     typeof place.distance === "number"
       ? place.distance.toFixed(1)
       : typeof place.distance === "string"
@@ -38,10 +54,15 @@ export default function PlaceCard({ place }: PlaceCardProps) {
 
   const tags: string[] = Array.isArray(place.tags) ? place.tags : [];
 
-  const imageSrc =
-    place.image ??
-    place.photoUrl ??
-    "https://placehold.co/800x400?text=Matcha";
+  // Handle photos array from backend or single photo URL
+  const imageSrc = (() => {
+    if (place.image) return place.image;
+    if (place.photoUrl) return place.photoUrl;
+    if (Array.isArray(place.photos) && place.photos.length > 0) {
+      return place.photos[0]; // Use first photo from array
+    }
+    return "https://placehold.co/800x400?text=Matcha";
+  })();
 
   const getMatchScoreColor = (score: number) => {
     if (score >= 90) return "bg-matcha-dark text-white";
@@ -50,7 +71,10 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50 cursor-pointer"
+      onClick={openInGoogleMaps}
+    >
       <div className="relative">
         <img
           src={imageSrc}
@@ -85,7 +109,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           </div>
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
-            <span>{distanceMi} mi</span>
+            <span>{distanceKm} km</span>
           </div>
         </div>
 
@@ -99,6 +123,14 @@ export default function PlaceCard({ place }: PlaceCardProps) {
               {tag}
             </Badge>
           ))}
+        </div>
+        
+        {/* Click hint */}
+        <div className="mt-3 pt-3 border-t border-border/20">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Click to open in Google Maps</span>
+            <span className="text-green-600">→</span>
+          </div>
         </div>
       </CardContent>
     </Card>
