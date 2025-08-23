@@ -22,12 +22,33 @@ const AIChatInterface: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [currentSentiment, setCurrentSentiment] = useState<string>('neutral');
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Generate a unique session ID for this chat
     const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     setSessionId(newSessionId);
+    
+    // Get user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Location access denied or error:', error);
+          // Default to Sydney if location access denied
+          setUserLocation({ lat: -33.8688, lng: 151.2093 });
+        }
+      );
+    } else {
+      // Fallback to Sydney if geolocation not supported
+      setUserLocation({ lat: -33.8688, lng: 151.2093 });
+    }
     
     // Add welcome message
     setMessages([{
@@ -94,6 +115,8 @@ const AIChatInterface: React.FC = () => {
         body: JSON.stringify({
           message: inputMessage,
           session_id: sessionId,
+          lat: userLocation?.lat,
+          lng: userLocation?.lng,
         }),
       });
 

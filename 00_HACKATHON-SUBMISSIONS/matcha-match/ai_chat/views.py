@@ -19,6 +19,8 @@ def chat_with_ai(request):
             data = json.loads(request.body)
             user_message = data.get('message', '')
             session_id = data.get('session_id', '')
+            user_lat = data.get('lat')  # User's latitude
+            user_lng = data.get('lng')  # User's longitude
             
             if not user_message or not session_id:
                 return JsonResponse({'error': 'Missing message or session_id'}, status=400)
@@ -52,7 +54,7 @@ def chat_with_ai(request):
             save_user_preferences(session_id, preferences, sentiment_result.get('confidence', 0.8))
             
             # Get café recommendations
-            cafe_recommendations = get_cafe_recommendations(user_message, sentiment, preferences)
+            cafe_recommendations = get_cafe_recommendations(user_message, sentiment, preferences, user_lat, user_lng)
             
             # Generate AI response
             ai_message = generate_ai_response(user_message, sentiment, preferences, session_id)
@@ -253,11 +255,15 @@ def save_user_preferences(session_id, preferences, confidence):
     except Exception as e:
         print(f"Error saving preferences: {e}")
 
-def get_cafe_recommendations(user_message, sentiment, preferences):
+def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None, user_lng=None):
     """Get real café recommendations from Google Maps - bulletproof version"""
     try:
-        # Default location (Sydney)
-        lat, lng = -33.8688, 151.2093
+        # Use user's location if provided, otherwise default to Sydney
+        if user_lat and user_lng:
+            lat, lng = user_lat, user_lng
+        else:
+            # Default location (Sydney CBD)
+            lat, lng = -33.8688, 151.2093
         
         # Get places from your existing API
         import requests
@@ -291,7 +297,9 @@ def get_cafe_recommendations(user_message, sentiment, preferences):
                 place_address = place.get('vicinity', 'Address not available')
                 place_rating = place.get('rating', 0)
                 place_price = place.get('price_level', 2)
-                place_distance = place.get('distance', 0)
+                # Convert distance from miles to kilometers and round to 1 decimal place
+                place_distance_miles = place.get('distance', 0)
+                place_distance_km = round(place_distance_miles * 1.60934, 1)  # Convert miles to km
                 
                 # Simple price formatting
                 if place_price == 1:
@@ -313,7 +321,7 @@ def get_cafe_recommendations(user_message, sentiment, preferences):
                     'rating': place_rating,
                     'price_level': price_display,
                     'match_reason': f"Great matcha café in Sydney - perfect for your {sentiment} mood",
-                    'distance': place_distance,
+                    'distance': place_distance_km,  # Now in kilometers
                     'photo_url': None,  # Skip photos for now to avoid errors
                     'lat': place.get('geometry', {}).get('location', {}).get('lat'),
                     'lng': place.get('geometry', {}).get('location', {}).get('lng')
