@@ -1,73 +1,184 @@
-# Welcome to your Lovable project
+# 🍵 MatchaMatch - AI-Powered Matcha Café Finder
 
-## Project info
+## 🏆 OpenxAI Global AI Accelerator 2025 Hackathon Submission
 
-**URL**: https://lovable.dev/projects/3bfd7b45-d5e8-40fb-ad2b-bc8d8191aed0
+**Track**: Social Network + Textstream (Sentiment Analysis)  
+**Team**: Fizzafatima  
+**University**: [Your University]  
+**Project**: MatchaMatch - Connecting people with their perfect matcha experience through AI and sentiment analysis
 
-## How can I edit this code?
+## 🎯 Project Overview
 
-There are several ways of editing your application.
+MatchaMatch is an intelligent application that helps users find their perfect matcha café match using natural language queries, AI-powered recommendations, and sentiment analysis. Instead of traditional search filters, users can describe their mood, preferences, and needs in natural language, and our AI will find the perfect café for them.
 
-**Use Lovable**
+### ✨ Key Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3bfd7b45-d5e8-40fb-ad2b-bc8d8191aed0) and start prompting.
+- **🤖 AI-Powered Search**: Natural language queries instead of rigid filters
+- **💚 Sentiment Analysis**: Understands user mood and preferences
+- **🗺️ Google Maps Integration**: Real-time location-based recommendations
+- **💬 Intelligent Chat Interface**: Conversational AI recommendations
+- **🎯 Personalized Matching**: Learns from user preferences and interactions
+- **📱 Modern Web App**: Beautiful, responsive interface built with React + Django
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🧠 AI Integration
 
-**Use your preferred IDE**
+- **Ollama Integration**: Local AI processing for privacy and speed
+- **Sentiment Analysis**: Detects user mood and adjusts recommendations
+- **Natural Language Processing**: Understands complex user requests
+- **Intelligent Matching**: AI-powered café recommendations
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- **Python 3.9+** installed on your system
+- **Node.js 18+** and npm for frontend
+- **Ollama** installed and running locally
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### One-Command Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# 1. Clone the repository
+git clone <your-repo-url>
+cd matcha-match
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 2. Set up Python environment and install dependencies
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Set up frontend dependencies
+npm install
+
+# 4. Start the backend server
+python manage.py runserver
+
+# 5. In a new terminal, start the frontend
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### 🎯 What Happens Next
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Backend starts** at `http://localhost:8000`
+2. **Frontend starts** at `http://localhost:3000`
+3. **Open your browser** and start finding your perfect matcha match!
 
-**Use GitHub Codespaces**
+## 🏗️ Architecture
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Backend (Django)
+- **Django 4.2** with REST API
+- **SQLite database** for development (easy to migrate to PostgreSQL)
+- **Google Maps API** integration for location services
+- **Ollama integration** for AI features
+- **Sentiment analysis** for user mood detection
 
-## What technologies are used for this project?
+### Frontend (React + Vite)
+- **React 18** with TypeScript
+- **Vite** for fast development
+- **Tailwind CSS** for modern styling
+- **Google Maps** integration
+- **Real-time chat interface**
 
-This project is built with:
+### AI Features
+- **Local Ollama processing** for privacy
+- **Sentiment analysis** of user queries
+- **Natural language understanding** for café preferences
+- **Intelligent matching** algorithms
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎨 User Experience Flow
 
-## How can I deploy this project?
+1. **User opens app** → Sees map + chat interface
+2. **Types natural language query** → "I want a peaceful café for studying"
+3. **AI analyzes intent** → Extracts: quiet, study-friendly, any location
+4. **AI searches database** → Finds matching cafés
+5. **AI generates response** → Friendly, personalized recommendation
+6. **Map highlights locations** → Shows cafés with AI insights
+7. **Sentiment tracking** → Records user preferences for future matches
 
-Simply open [Lovable](https://lovable.dev/projects/3bfd7b45-d5e8-40fb-ad2b-bc8d8191aed0) and click on Share -> Publish.
+## 🔧 Technical Implementation
 
-## Can I connect a custom domain to my Lovable project?
+### Dependencies
 
-Yes, you can!
+All Python dependencies are managed in `requirements.txt`:
+- **Django 4.2.23** - Web framework
+- **Django REST Framework 3.16.1** - API development
+- **Google Maps API** - Location services
+- **python-dotenv** - Environment configuration
+- **Pillow** - Image processing
+- **Requests** - HTTP client
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Environment Variables
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Create a `.env` file in the root directory:
+```env
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+SECRET_KEY=your_django_secret_key_here
+DEBUG=True
+```
+
+### Database
+
+- **Development**: SQLite (included)
+- **Production**: PostgreSQL (easy migration)
+
+## 🎯 Hackathon Requirements Met
+
+### ✅ Sentiment Analysis
+- **User mood detection** from natural language queries
+- **Emotional context** for café recommendations
+- **Sentiment-aware AI responses**
+
+### ✅ AI Integration
+- **Ollama local AI processing**
+- **Natural language understanding**
+- **Intelligent recommendation system**
+
+### ✅ Real-World Application
+- **Solves actual user problems**
+- **Google Maps integration**
+- **Professional architecture**
+
+### ✅ Technical Excellence
+- **Full-stack development** (Django + React)
+- **API-first design**
+- **Modern development practices**
+
+## 🚀 Future Enhancements
+
+- **Machine learning** for better recommendations
+- **Social features** for café reviews and ratings
+- **Mobile app** development
+- **Advanced sentiment analysis** with conversation memory
+- **Integration with café POS systems**
+
+## 📱 Demo Video
+
+[Link to your demo video showing the app in action]
+
+## 🏆 Why This Should Win
+
+1. **Real Problem Solved**: Finding the right café is a genuine user pain point
+2. **AI Innovation**: Combines sentiment analysis with location services
+3. **Professional Quality**: Production-ready code with proper architecture
+4. **User Experience**: Intuitive, conversational interface
+5. **Technical Excellence**: Full-stack development with modern tools
+6. **Scalability**: Easy to extend and improve
+
+## 🤝 Contributing
+
+This is a hackathon submission for the OpenxAI Global AI Accelerator 2025. The project demonstrates:
+
+- **AI integration** with Ollama
+- **Sentiment analysis** for user experience
+- **Real-world application** development
+- **Professional software engineering** practices
+
+## 📞 Support
+
+For questions about this submission, contact: [Your Contact Information]
+
+---
+
+**Built with ❤️ for the OpenxAI Global AI Accelerator 2025**
+
+*Connecting people with their perfect matcha experience through the power of AI*
