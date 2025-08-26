@@ -58,29 +58,29 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-gradient-to-r from-matcha-medium to-matcha-dark shadow-lg">
+    <header className="bg-appprimary/90 backdrop-blur-sm border-b border-appprimary shadow-lg">
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-3 items-center">
           <div />
-          <h1 className="col-span-1 text-center text-3xl font-bold text-white tracking-wide flex items-center justify-center space-x-3">
-            <Leaf className="h-8 w-8" />
+          <h1 className="col-span-1 text-center text-3xl font-bold text-foreground tracking-wide flex items-center justify-center space-x-3">
+            <Leaf className="h-8 w-8 text-appaccent" />
             <span>Matcha Match</span>
           </h1>
           <div className="flex justify-end">
             {user ? (
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-white hover:bg-white/20 border border-white/30">
+              <Button variant="ghost" size="sm" onClick={signOut} className="text-appaccent hover:bg-appprimary/80 border border-appaccent/30">
                 <User className="h-4 w-4 mr-2" />
                 {user.name || "Profile"} (Sign out)
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-white hover:bg-white/20 border border-white/30">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-appaccent hover:bg-appprimary/80 border border-appaccent/30">
                 <User className="h-4 w-4 mr-2" />
                 Sign In
               </Button>
             )}
           </div>
         </div>
-        <p className="text-center text-matcha-light mt-1">Discover the perfect matcha experience near you</p>
+        <p className="text-center text-appaccent mt-1">Discover the perfect matcha experience near you</p>
       </div>
     </header>
   );

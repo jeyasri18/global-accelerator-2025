@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,33 +9,26 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 120 20% 98%;
-    --foreground: 140 40% 15%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 140 30% 20%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 140 30% 20%;
-
-    --primary: 140 60% 35%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 120 30% 95%;
-    --secondary-foreground: 140 40% 25%;
-
-    --muted: 120 20% 95%;
-    --muted-foreground: 140 20% 50%;
-
-    --accent: 140 40% 85%;
-    --accent-foreground: 140 60% 25%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 120 25% 88%;
-    --input: 120 25% 92%;
-    --ring: 140 60% 35%;
+    --background: 48 100% 97%;      /* #FFFDF6 */
+    --foreground: 90 10% 20%;       /* dark neutral for text */
+    --card: 45 67% 95%;             /* #FAF6E9 */
+    --card-foreground: 90 10% 20%;  /* dark neutral */
+    --popover: 45 67% 95%;          /* #FAF6E9 */
+    --popover-foreground: 90 10% 20%; /* dark neutral */
+    --primary: 74 61% 76%;          /* #DDEB9D */
+    --primary-foreground: 90 10% 20%; /* dark neutral */
+    --secondary: 74 41% 63%;        /* #A0C878 */
+    --secondary-foreground: 90 10% 20%; /* dark neutral */
+    --muted: 45 67% 95%;            /* #FAF6E9 */
+    --muted-foreground: 90 10% 40%; /* slightly lighter neutral */
+    --accent: 74 41% 63%;           /* #A0C878 */
+    --accent-foreground: 90 10% 20%; /* dark neutral */
+    --destructive: 0 84% 60%;       /* fallback red */
+    --destructive-foreground: 0 0% 100%; /* white */
+    --border: 45 67% 90%;           /* lighter beige */
+    --input: 45 67% 95%;            /* #FAF6E9 */
+    --ring: 74 41% 63%;             /* #A0C878 */
+    --radius: 0.5rem;
 
     /* Matcha-specific colors */
     --matcha-light: 120 40% 85%;
@@ -52,8 +46,6 @@ All colors MUST be HSL.
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -134,6 +126,14 @@ All colors MUST be HSL.
 }
 
 @layer base {
+  html, body {
+    font-family: 'Bree Serif', system-ui, serif;
+  }
+  .font-cute {
+    font-family: 'Bree Serif', system-ui, serif;
+    letter-spacing: 0.01em;
+  }
+
   * {
     @apply border-border;
   }

@@ -134,38 +134,32 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-appaccent">
       <Header />
       <div className="container mx-auto px-4 py-6">
         {/* Top Places Carousel */}
         <div className="mb-8">
           <TopPlacesCarousel />
         </div>
-        
         <div className="flex justify-center mb-6 space-x-4">
           <ViewToggle currentView={currentView} onViewChange={setCurrentView} />
           <button
             onClick={() => navigate("/calendar")}
-            className="bg-matcha-medium hover:bg-matcha-dark text-white font-semibold py-2 px-4 rounded-lg transition"
+            className="bg-appbg hover:bg-appprimary text-appaccent font-semibold py-2 px-4 rounded-lg transition font-cute"
           >
             View Matcha Calendar
           </button>
         </div>
-
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-matcha-dark mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading matcha places...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-appprimary mx-auto mb-4"></div>
+              <p className="text-appbg font-cute">Loading matcha places...</p>
             </div>
           </div>
         ) : currentView === "list" ? (
           <ListView places={places} />
         ) : (
-          // NOTE: your current MapView fetches its own data,
-          // so it won't use the ranked list yet.
-          // If you want the map to share the same ranked data, change MapView to accept props and do:
-          // <MapView places={places} />
           <MapView />
         )}
       </div>

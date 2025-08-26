@@ -67,7 +67,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				palette1: '#FFFDF6', // Cream White
+				palette2: '#FAF6E9', // Light Beige
+				palette3: '#DDEB9D', // Pastel Green
+				palette4: '#A0C878', // Sage Green
+				// Semantic aliases for easier use
+				appbg: '#FFFDF6', // palette1
+				appaccent: '#A0C878', // palette4
+				appprimary: '#DDEB9D', // palette3
+				appsecondary: '#FAF6E9', // palette2
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

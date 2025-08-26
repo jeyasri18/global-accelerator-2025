@@ -275,7 +275,7 @@ const TopPlacesCarousel: React.FC = () => {
               setTimeout(() => setIsAutoPlaying(true), 10000);
             }}
             className={`w-3 h-3 rounded-full transition-all ${
-              index === currentIndex ? 'bg-green-600 w-8' : 'bg-green-300'
+              index === currentIndex ? 'bg-appaccent w-8' : 'bg-appprimary'
             }`}
           />
         ))}
@@ -283,7 +283,7 @@ const TopPlacesCarousel: React.FC = () => {
 
       {/* Main Card - Fixed Dimensions */}
       <div 
-        className="bg-white rounded-2xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 w-full h-[500px] flex flex-col"
+        className="bg-card rounded-2xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 w-full h-[500px] flex flex-col"
         onClick={() => openInGoogleMaps(currentPlace)}
       >
         {/* Photo Section - Fixed Height */}
@@ -294,8 +294,7 @@ const TopPlacesCarousel: React.FC = () => {
               alt={currentPlace.name}
               className="w-full h-full object-cover"
               onError={(e) => {
-                console.log('Image failed to load, using fallback');
-                const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d'];
+                const fallbackColors = ['FFFDF6', 'FAF6E9', 'DDEB9D', 'A0C878'];
                 const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
                 (e.currentTarget as HTMLImageElement).src =
                   `https://via.placeholder.com/400x256/${randomColor}/ffffff?text=${encodeURIComponent(currentPlace.name)}`;
@@ -303,72 +302,64 @@ const TopPlacesCarousel: React.FC = () => {
               onLoad={() => console.log('Image loaded successfully:', currentPlace.photos?.[0])}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-appprimary to-appaccent flex items-center justify-center">
               <div className="text-center">
-                <Coffee className="w-20 h-20 text-green-600 mx-auto mb-3" />
-                <p className="text-xl font-semibold text-green-700">{currentPlace.name}</p>
-                <p className="text-sm text-green-600 mt-2">No photo available</p>
+                <Coffee className="w-20 h-20 text-appaccent mx-auto mb-3" />
+                <p className="text-xl font-semibold text-foreground">{currentPlace.name}</p>
+                <p className="text-sm text-appprimary mt-2">No photo available</p>
               </div>
             </div>
           )}
-          
           {/* Price Badge - Top Right */}
-          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-            <span className="text-sm font-semibold text-green-700">{currentPlace.price_level}</span>
+          <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
+            <span className="text-sm font-semibold text-appprimary">{currentPlace.price_level}</span>
           </div>
-          
           {/* Rating Badge - Top Left */}
-          <div className="absolute top-4 left-4 bg-yellow-100/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
+          <div className="absolute top-4 left-4 bg-appaccent/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
             <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-              <span className="text-sm font-semibold text-yellow-700">{currentPlace.rating}</span>
+              <Star className="w-4 h-4 text-appprimary fill-current" />
+              <span className="text-sm font-semibold text-white">{currentPlace.rating}</span>
             </div>
           </div>
         </div>
-
         {/* Content Section - Fixed Height */}
         <div className="p-6 flex-1 flex flex-col justify-between">
           {/* Top Content */}
           <div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3 line-clamp-2">{currentPlace.name}</h3>
-            
-            <div className="flex items-center space-x-2 text-gray-600 mb-3">
-              <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
+            <h3 className="text-2xl font-bold text-foreground mb-3 line-clamp-2">{currentPlace.name}</h3>
+            <div className="flex items-center space-x-2 text-foreground mb-3">
+              <MapPin className="w-4 h-4 text-appaccent flex-shrink-0" />
               <span className="text-sm line-clamp-2">{currentPlace.address}</span>
             </div>
           </div>
-          
           {/* Bottom Content */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              <span className="text-sm text-foreground bg-appprimary/40 px-3 py-1 rounded-full">
                 {currentPlace.distance} km away
               </span>
             </div>
-            
             <div className="text-center">
-              <span className="text-xs text-green-600 font-medium bg-green-50 px-3 py-2 rounded-full">
+              <span className="text-xs text-appaccent font-medium bg-card px-3 py-2 rounded-full">
                 Click to open in Google Maps →
               </span>
             </div>
           </div>
         </div>
+        {/* Navigation Arrows */}
+        <button
+          onClick={prevPlace}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all hover:scale-110"
+        >
+          <ChevronLeft className="w-6 h-6 text-appaccent" />
+        </button>
+        <button
+          onClick={nextPlace}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all hover:scale-110"
+        >
+          <ChevronRight className="w-6 h-6 text-appaccent" />
+        </button>
       </div>
-
-      {/* Navigation Arrows */}
-      <button
-        onClick={prevPlace}
-        className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all hover:scale-110"
-      >
-        <ChevronLeft className="w-6 h-6 text-green-600" />
-      </button>
-      
-      <button
-        onClick={nextPlace}
-        className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all hover:scale-110"
-      >
-        <ChevronRight className="w-6 h-6 text-green-600" />
-      </button>
     </div>
   );
 };

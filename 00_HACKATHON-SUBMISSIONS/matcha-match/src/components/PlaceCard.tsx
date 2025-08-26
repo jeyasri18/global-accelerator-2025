@@ -101,14 +101,14 @@ export default function PlaceCard({ place }: PlaceCardProps) {
   })();
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 90) return "bg-matcha-dark text-white";
-    if (score >= 80) return "bg-matcha-medium text-white";
-    return "bg-matcha-light text-matcha-forest";
+    if (score >= 90) return "bg-appaccent text-white";
+    if (score >= 80) return "bg-appprimary text-foreground";
+    return "bg-appsecondary text-foreground";
   };
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50 cursor-pointer"
+      className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border border-appprimary bg-card cursor-pointer"
       onClick={openInGoogleMaps}
     >
       <div className="relative">
@@ -119,7 +119,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           onError={(e) => {
             // Create a better fallback image with the café name
             const cafeName = place.name || 'Matcha';
-            const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d', '166534'];
+            const fallbackColors = ['FFFDF6', 'FAF6E9', 'DDEB9D', 'A0C878'];
             const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
             (e.currentTarget as HTMLImageElement).src = 
               `https://via.placeholder.com/800x400/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
@@ -129,47 +129,41 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           {matchScore}% match
         </Badge>
       </div>
-
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="font-semibold text-lg text-foreground truncate">
             {text(place.name)}
           </h3>
-          <div className="flex items-center space-x-1 text-amber-500">
+          <div className="flex items-center space-x-1 text-appaccent">
             <Star className="h-4 w-4 fill-current" />
             <span className="text-sm font-medium">{rating}</span>
           </div>
         </div>
-
-        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
+        <div className="flex items-center space-x-4 text-sm text-foreground/70 mb-3">
           <div className="flex items-center space-x-1">
             <DollarSign className="h-4 w-4" />
             <span>{place.priceRange || "$$"}</span>
-
           </div>
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
             <span>{distanceKm} km</span>
           </div>
         </div>
-
-        <p className="text-sm text-muted-foreground mb-3 truncate">
+        <p className="text-sm text-foreground/70 mb-3 truncate">
           {address}
         </p>
-
         <div className="flex flex-wrap gap-1">
           {(tags ?? []).slice(0, 3).map((tag: string) => (
-            <Badge key={tag} variant="secondary" className="text-xs">
+            <Badge key={tag} variant="secondary" className="text-xs bg-appaccent text-white">
               {tag}
             </Badge>
           ))}
         </div>
-        
         {/* Click hint */}
-        <div className="mt-3 pt-3 border-t border-border/20">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-3 pt-3 border-t border-appprimary/20">
+          <div className="flex items-center justify-between text-xs text-appaccent">
             <span>Click to open in Google Maps</span>
-            <span className="text-green-600">→</span>
+            <span className="text-appprimary">→</span>
           </div>
         </div>
       </CardContent>
