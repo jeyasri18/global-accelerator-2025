@@ -1,46 +1,8 @@
-// import { Leaf, User } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { useNavigate } from "react-router-dom";
-
-// export default function Header() {
-//   const navigate = useNavigate();
-
-//   return (
-//     <header className="bg-gradient-to-r from-matcha-medium to-matcha-dark shadow-lg">
-//       <div className="container mx-auto px-4 py-6">
-//         <div className="grid grid-cols-3 items-center">
-//           <div></div>
-
-//           <h1 className="col-span-1 text-center text-3xl font-bold text-white tracking-wide flex items-center justify-center space-x-3">
-//             <Leaf className="h-8 w-8" />
-//             <span>Matcha Match</span>
-//           </h1>
-
-//           <div className="flex justify-end">
-//             <Button
-//               variant="ghost"
-//               size="sm"
-//               onClick={() => navigate("/auth")}
-//               className="text-white hover:bg-white/20 border border-white/30"
-//             >
-//               <User className="h-4 w-4 mr-2" />
-//               Sign In
-//             </Button>
-//           </div>
-//         </div>
-
-//         {/* Subtitle closer to the title */}
-//         <p className="text-center text-matcha-light mt-1">
-//           Discover the perfect matcha experience near you
-//         </p>
-//       </div>
-//     </header>
-//   );
-// }
 import { useEffect, useState } from "react";
-import { Leaf, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import logo from "@/logo.png";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -58,29 +20,29 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-appprimary/90 backdrop-blur-sm border-b border-appprimary shadow-lg">
+    <header className="bg-primary/90 backdrop-blur-sm border-b border-background shadow-lg">
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-3 items-center">
           <div />
-          <h1 className="col-span-1 text-center text-3xl font-bold text-foreground tracking-wide flex items-center justify-center space-x-3">
-            <Leaf className="h-8 w-8 text-appaccent" />
-            <span>Matcha Match</span>
+          <h1 className="col-span-1 text-center text-3xl font-bold text-foreground tracking-wide flex flex-col items-center justify-center space-y-2">
+            <img src={logo} alt="Matcha Match Logo" className="h-16 w-16" />
+            <span className="text-foreground">Matcha Match</span>
           </h1>
           <div className="flex justify-end">
             {user ? (
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-appaccent hover:bg-appprimary/80 border border-appaccent/30">
+              <Button variant="ghost" size="sm" onClick={signOut} className="text-accent bg-background hover:bg-background/80 border border-accent/30">
                 <User className="h-4 w-4 mr-2" />
                 {user.name || "Profile"} (Sign out)
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-appaccent hover:bg-appprimary/80 border border-appaccent/30">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="text-accent bg-background hover:bg-background/80 border border-accent/30">
                 <User className="h-4 w-4 mr-2" />
                 Sign In
               </Button>
             )}
           </div>
         </div>
-        <p className="text-center text-appaccent mt-1">Discover the perfect matcha experience near you</p>
+        <p className="text-center text-foreground mt-1">Discover the perfect matcha experience near you</p>
       </div>
     </header>
   );

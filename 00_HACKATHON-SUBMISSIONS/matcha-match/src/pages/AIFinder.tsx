@@ -1,59 +1,41 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
 import AIChatInterface from "@/components/AIChatInterface";
 import TopPlacesCarousel from "@/components/TopPlacesCarousel";
-import { Coffee, MessageCircle, MapPin, Sparkles, X } from "lucide-react";
+import { MessageCircle, Sparkles, X } from "lucide-react";
 
 export default function AIFinder() {
   const [showChat, setShowChat] = useState(false);
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-appaccent">
-      {/* Header */}
-      <div className="bg-appprimary/90 backdrop-blur-sm border-b border-appprimary sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between relative">
-            <div className="flex-1 flex justify-center">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-appprimary rounded-full">
-                  <Coffee className="w-6 h-6 text-appaccent" />
-                </div>
-                <h1 className="text-2xl font-bold text-foreground font-cute">MatchaMatch</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4 absolute right-0 top-1/2 -translate-y-1/2">
-              <button
-                onClick={() => setShowChat(!showChat)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
-                  showChat 
-                    ? 'bg-appbg text-appaccent shadow-lg' 
-                    : 'bg-appprimary text-foreground border-2 border-appbg hover:bg-appprimary/80'
-                } font-cute`}
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span className="font-medium">
-                  {showChat ? 'Hide AI Chat' : 'Ask AI Guide'}
-                </span>
-              </button>
-              <button
-                onClick={() => navigate("/home")}
-                className="flex items-center space-x-2 px-4 py-2 bg-appbg text-appaccent rounded-full hover:bg-appprimary transition-colors font-cute"
-              >
-                <MapPin className="w-4 h-4" />
-                <span className="font-medium">View All Spots</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* AI Chat Button */}
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => setShowChat(!showChat)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
+              showChat 
+                ? 'bg-primary text-foreground shadow-lg' 
+                : 'bg-primary text-foreground border-2 border-background hover:bg-primary/80'
+            } font-cute`}
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="font-medium">
+              {showChat ? 'Hide AI Chat' : 'Ask AI Guide'}
+            </span>
+          </button>
+        </div>
+        
         {/* Main Content - Centered */}
         <div className="text-center space-y-8">
           {/* Hero Section */}
           <div className="bg-appprimary rounded-3xl shadow-xl p-8 max-w-4xl mx-auto">
             <div className="mb-6">
-              <div className="inline-flex items-center space-x-2 bg-appbg text-appaccent px-4 py-2 rounded-full mb-4">
+              <div className="inline-flex items-center space-x-2 bg-appbg text-foreground px-4 py-2 rounded-full mb-4">
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">AI-Powered Matching</span>
               </div>
@@ -66,7 +48,7 @@ export default function AIFinder() {
             </p>
             <button
               onClick={() => navigate("/home")}
-              className="bg-appbg hover:bg-appprimary transition text-appaccent font-bold py-3 px-8 rounded-full shadow-lg"
+              className="bg-appbg hover:bg-appprimary transition text-foreground font-bold py-3 px-8 rounded-full shadow-lg"
             >
               View All Matcha Spots
             </button>
@@ -81,7 +63,7 @@ export default function AIFinder() {
             <div className="bg-appprimary/90 backdrop-blur-sm rounded-2xl p-6 border border-appbg">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="p-2 bg-appbg rounded-full">
-                  <MessageCircle className="w-5 h-5 text-appaccent" />
+                  <MessageCircle className="w-5 h-5 text-foreground" />
                 </div>
                 <h3 className="font-semibold text-foreground">AI Chat Guide</h3>
               </div>
@@ -92,7 +74,7 @@ export default function AIFinder() {
             <div className="bg-appprimary/90 backdrop-blur-sm rounded-2xl p-6 border border-appbg">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="p-2 bg-appbg rounded-full">
-                  <Sparkles className="w-5 h-5 text-appaccent" />
+                  <Sparkles className="w-5 h-5 text-foreground" />
                 </div>
                 <h3 className="font-semibold text-foreground">Sentiment Analysis</h3>
               </div>
@@ -106,15 +88,15 @@ export default function AIFinder() {
             <h3 className="text-xl font-semibold text-foreground mb-4">How It Works</h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-appaccent font-bold text-sm">1</div>
+                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-foreground font-bold text-sm">1</div>
                 <span className="text-foreground">Tell our AI what you're looking for</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-appaccent font-bold text-sm">2</div>
+                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-foreground font-bold text-sm">2</div>
                 <span className="text-foreground">AI analyzes your mood and preferences</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-appaccent font-bold text-sm">3</div>
+                <div className="w-8 h-8 bg-appbg rounded-full flex items-center justify-center text-foreground font-bold text-sm">3</div>
                 <span className="text-foreground">Get personalized café recommendations</span>
               </div>
             </div>
@@ -135,7 +117,7 @@ export default function AIFinder() {
         <div className="fixed bottom-0 left-0 right-0 z-50">
           <div className="bg-appprimary rounded-t-3xl shadow-2xl border-t-2 border-appbg max-h-[80vh] overflow-hidden">
             {/* Chat Header */}
-            <div className="bg-appbg text-appaccent px-6 py-4 rounded-t-3xl flex items-center justify-between">
+            <div className="bg-appbg text-foreground px-6 py-4 rounded-t-3xl flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <MessageCircle className="w-5 h-5" />
                 <h3 className="font-semibold">AI Matcha Guide</h3>

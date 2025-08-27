@@ -3,65 +3,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ========================================
+   STANDARDIZED COLOR SYSTEM
+   All colors defined here for easy editing
+   ======================================== */
 
 @layer base {
   :root {
-    --background: 48 100% 97%;      /* #FFFDF6 */
-    --foreground: 90 10% 20%;       /* dark neutral for text */
-    --card: 45 67% 95%;             /* #FAF6E9 */
-    --card-foreground: 90 10% 20%;  /* dark neutral */
-    --popover: 45 67% 95%;          /* #FAF6E9 */
-    --popover-foreground: 90 10% 20%; /* dark neutral */
-    --primary: 74 61% 76%;          /* #DDEB9D */
-    --primary-foreground: 90 10% 20%; /* dark neutral */
-    --secondary: 74 41% 63%;        /* #A0C878 */
-    --secondary-foreground: 90 10% 20%; /* dark neutral */
-    --muted: 45 67% 95%;            /* #FAF6E9 */
-    --muted-foreground: 90 10% 40%; /* slightly lighter neutral */
-    --accent: 74 41% 63%;           /* #A0C878 */
-    --accent-foreground: 90 10% 20%; /* dark neutral */
-    --destructive: 0 84% 60%;       /* fallback red */
-    --destructive-foreground: 0 0% 100%; /* white */
-    --border: 45 67% 90%;           /* lighter beige */
-    --input: 45 67% 95%;            /* #FAF6E9 */
-    --ring: 74 41% 63%;             /* #A0C878 */
+    /* ===== MASTER COLOR PALETTE ===== */
+    /* EDIT COLORS HERE - ONLY PLACE YOU NEED TO CHANGE! */
+    --MASTER-website: 120 25% 58%;    /* #6FAE74 - Website background */
+    --MASTER-header: 120 30% 78%;     /* #BEDAC0 - Header */
+    --MASTER-cards: 120 25% 35%;      /* #405842 - Cards, popovers */
+    --MASTER-text: 90 10% 20%;        /* #2A2A2A - Primary text */
+    --MASTER-accent: 120 40% 90%;     /* #E5F0E6 - Additional accents */
+
+    /* ===== SEMANTIC COLOR MAPPING ===== */
+    /* These automatically use the master palette above */
+    --background: var(--MASTER-website);           /* Main website background */
+    --foreground: var(--MASTER-text);              /* Primary text color */
+    --card: var(--MASTER-cards);                   /* Card backgrounds */
+    --card-foreground: var(--MASTER-text);         /* Card text */
+    --popover: var(--MASTER-cards);                /* Popover backgrounds */
+    --popover-foreground: var(--MASTER-text);      /* Popover text */
+    --primary: var(--MASTER-header);               /* Primary elements */
+    --primary-foreground: var(--MASTER-text);      /* Primary text */
+    --secondary: var(--MASTER-website);            /* Secondary elements */
+    --secondary-foreground: var(--MASTER-text);    /* Secondary text */
+    --muted: var(--MASTER-website);                /* Muted backgrounds */
+    --muted-foreground: 90 10% 40%;               /* #666666 - Muted text */
+    --accent: var(--MASTER-accent);                /* Accent elements */
+    --accent-foreground: var(--MASTER-text);       /* Accent text */
+    --destructive: 0 84% 60%;                      /* Error/delete red */
+    --destructive-foreground: 0 0% 100%;          /* White text on red */
+    --border: 120 25% 60%;                         /* #7AA87D - Borders */
+    --input: var(--MASTER-cards);                  /* Input backgrounds */
+    --ring: var(--MASTER-accent);                  /* Focus rings */
     --radius: 0.5rem;
 
-    /* Matcha-specific colors */
-    --matcha-light: 120 40% 85%;
-    --matcha-medium: 140 50% 60%;
-    --matcha-dark: 140 60% 35%;
-    --matcha-forest: 150 70% 25%;
-    
-    /* Gradients */
-    --gradient-matcha: linear-gradient(135deg, hsl(var(--matcha-light)), hsl(var(--matcha-medium)));
-    --gradient-hero: linear-gradient(180deg, hsl(var(--background)), hsl(var(--matcha-light)));
-    
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(var(--matcha-medium) / 0.15);
-    --shadow-card: 0 2px 8px -2px hsl(var(--matcha-medium) / 0.1);
-    
-    /* Transitions */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* ===== SIDEBAR COLORS ===== */
+    --sidebar-background: var(--MASTER-website);
+    --sidebar-foreground: var(--MASTER-text);
+    --sidebar-primary: var(--MASTER-text);
+    --sidebar-primary-foreground: var(--MASTER-header);
+    --sidebar-accent: var(--MASTER-header);
+    --sidebar-accent-foreground: var(--MASTER-text);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--MASTER-accent);
   }
 
   /* Line clamp utilities for text truncation */
