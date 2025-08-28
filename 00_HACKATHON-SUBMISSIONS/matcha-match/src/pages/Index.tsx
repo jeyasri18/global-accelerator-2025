@@ -134,7 +134,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-appaccent">
+    <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 py-6">
         {/* Top Places Carousel */}
@@ -145,7 +145,7 @@ export default function Index() {
           <ViewToggle currentView={currentView} onViewChange={setCurrentView} />
           <button
             onClick={() => navigate("/calendar")}
-            className="bg-appbg hover:bg-appprimary text-appaccent font-semibold py-2 px-4 rounded-lg transition font-cute"
+            className="bg-primary hover:bg-primary/80 text-foreground font-semibold py-2 px-4 rounded-lg transition font-cute"
           >
             View Matcha Calendar
           </button>
@@ -153,8 +153,8 @@ export default function Index() {
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-appprimary mx-auto mb-4"></div>
-              <p className="text-appbg font-cute">Loading matcha places...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-foreground font-cute">Loading matcha places...</p>
             </div>
           </div>
         ) : currentView === "list" ? (
