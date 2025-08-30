@@ -45,7 +45,7 @@ MatchaMatch is an intelligent application that helps users find their perfect ma
 ```bash
 # 1. Clone the repository
 git clone <your-repo-url>
-cd matcha-match
+cd 0002_MATCHA-MATCH
 
 # 2. Set up Python environment and install dependencies
 python3 -m venv .venv
