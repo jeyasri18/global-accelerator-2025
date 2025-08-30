@@ -7,6 +7,9 @@
 **University**: The University of Sydney
 **Project**: MatchaMatch - Connecting people with their perfect matcha experience through AI and sentiment analysis
 
+# Youtube link:
+https://youtu.be/p_Va9aGfPpY
+
 ## 🎯 Project Overview
 
 MatchaMatch is an intelligent application that helps users find their perfect matcha café match using natural language queries, AI-powered recommendations, and sentiment analysis. Instead of traditional search filters, users can describe their mood, preferences, and needs in natural language, and our AI will find the perfect café for them.
