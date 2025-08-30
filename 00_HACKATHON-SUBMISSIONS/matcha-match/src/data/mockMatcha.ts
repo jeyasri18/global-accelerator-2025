@@ -10,6 +10,8 @@ export interface MatchaPlace {
   lng: number;
   image: string;
   tags: string[];
+  heartsCount?: number; // NEW: Number of hearts for this place
+  isHearted?: boolean; // NEW: Whether current user has hearted this place
 }
 
 export const mockMatchaPlaces: MatchaPlace[] = [
@@ -24,7 +26,8 @@ export const mockMatchaPlaces: MatchaPlace[] = [
     lat: 37.7749,
     lng: -122.4194,
     image: "http://localhost:8001/api/ai/placeholder/300/200",
-    tags: ["ceremonial grade", "organic", "wifi"]
+    tags: ["ceremonial grade", "organic", "wifi"],
+    heartsCount: 42
   },
   {
     id: "2", 
@@ -37,7 +40,8 @@ export const mockMatchaPlaces: MatchaPlace[] = [
     lat: 37.7849,
     lng: -122.4094,
     image: "http://localhost:8001/api/ai/placeholder/300/200",
-    tags: ["premium blends", "quiet atmosphere", "desserts"]
+    tags: ["premium blends", "quiet atmosphere", "desserts"],
+    heartsCount: 35
   },
   {
     id: "3",
@@ -50,7 +54,8 @@ export const mockMatchaPlaces: MatchaPlace[] = [
     lat: 37.7649,
     lng: -122.4294,
     image: "http://localhost:8001/api/ai/placeholder/300/200",
-    tags: ["affordable", "casual", "takeout"]
+    tags: ["affordable", "casual", "takeout"],
+    heartsCount: 28
   },
   {
     id: "4",
@@ -63,7 +68,8 @@ export const mockMatchaPlaces: MatchaPlace[] = [
     lat: 37.7549,
     lng: -122.4394,
     image: "http://localhost:8001/api/ai/placeholder/300/200",
-    tags: ["tea ceremony", "authentic", "premium"]
+    tags: ["tea ceremony", "authentic", "premium"],
+    heartsCount: 67
   },
   {
     id: "5",
@@ -76,6 +82,7 @@ export const mockMatchaPlaces: MatchaPlace[] = [
     lat: 37.7449,
     lng: -122.4494,
     image: "http://localhost:8001/api/ai/placeholder/300/200",
-    tags: ["modern twist", "instagram-worthy", "fusion"]
+    tags: ["modern twist", "instagram-worthy", "fusion"],
+    heartsCount: 19
   }
 ];

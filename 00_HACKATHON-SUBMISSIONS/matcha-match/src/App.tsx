@@ -11,6 +11,7 @@ import AIFinder from "./pages/AIFinder";
 import CalendarPage from "./pages/Calendar";
 import MapPage from "./pages/MapPage";
 import Discover from "./pages/Discover";
+import Favorites from "./pages/Favorites";
 
 // NEW (from your friend)
 import Auth from "./pages/Auth";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/discover" element={<Discover />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/favorites" element={<Favorites />} />
 
           {/* new routes */}
           <Route path="/auth" element={<Auth />} />

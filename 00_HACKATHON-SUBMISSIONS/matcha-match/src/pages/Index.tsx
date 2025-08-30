@@ -7,6 +7,7 @@ import MapView from "@/components/MapView"; // current MapView fetches its own d
 import TopPlacesCarousel from "@/components/TopPlacesCarousel";
 import { mockMatchaPlaces, MatchaPlace } from "@/data/mockMatcha";
 import { useToast } from "@/hooks/use-toast";
+import { useFavorites } from "@/hooks/useFavorites";
 import ChatWidget from "@/components/ChatWidget";
 
 // CHANGED: keep a single place to define your API base
@@ -59,6 +60,7 @@ export default function Index() {
   const [places, setPlaces] = useState<MatchaPlace[]>(mockMatchaPlaces);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { getHeartCount, isHearted } = useFavorites();
 
   useEffect(() => {
     initializePlaces();
@@ -107,6 +109,8 @@ export default function Index() {
         address: (p.vicinity ?? p.address ?? "") as string,
         photos: Array.isArray(p.photos) && p.photos.length ? p.photos : [`http://localhost:8001/api/ai/placeholder/400/200/`],
         openNow: p.open_now ?? p.opening_hours?.open_now ?? undefined,
+        heartsCount: getHeartCount(p.id ?? p.place_id ?? ""),
+        isHearted: isHearted(p.id ?? p.place_id ?? ""),
       }));
 
       // CHANGED: apply preferences before setting places
@@ -121,7 +125,11 @@ export default function Index() {
       console.error("Failed to fetch places from backend:", err);
 
       // CHANGED: also apply preferences to demo data so the list is still personalized
-      const rankedFallback = applyPrefs(mockMatchaPlaces, getPrefs());
+      const rankedFallback = applyPrefs(mockMatchaPlaces, getPrefs()).map(place => ({
+        ...place,
+        heartsCount: getHeartCount(place.id),
+        isHearted: isHearted(place.id),
+      }));
       setPlaces(rankedFallback);
 
       toast({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { User, MapPin, Calendar, MessageCircle } from "lucide-react";
+import { User, MapPin, Calendar, MessageCircle, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import logo from "@/logo.png";
@@ -23,7 +23,7 @@ export default function Header() {
     <header className="bg-primary/90 backdrop-blur-sm border-b border-background shadow-lg">
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-3 items-center">
-          {/* Left Side - Discover and Calendar Buttons */}
+          {/* Left Side - Discover, Calendar, and Favorites Buttons */}
           <div className="flex justify-start space-x-3">
             <Button
               onClick={() => navigate("/discover")}
@@ -43,6 +43,16 @@ export default function Header() {
             >
               <Calendar className="h-4 w-4 mr-2" />
               Calendar
+            </Button>
+            
+            <Button
+              onClick={() => navigate("/favorites")}
+              variant="outline"
+              size="sm"
+              className="bg-background/80 hover:bg-background text-foreground border-accent/30 hover:border-accent/50 transition-colors"
+            >
+              <Heart className="h-4 w-4 mr-2" />
+              Favorites
             </Button>
           </div>
           

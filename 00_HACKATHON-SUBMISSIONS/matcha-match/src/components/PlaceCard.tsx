@@ -1,7 +1,9 @@
-import { Star, MapPin, DollarSign } from "lucide-react";
+import { Star, MapPin, DollarSign, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MatchaPlace } from "@/data/mockMatcha";
+import { useFavorites } from "@/hooks/useFavorites";
+import ReviewsSection from "./ReviewsSection";
 
 // Helpers to avoid runtime crashes
 const text = (v: unknown, max = 999) => String(v ?? "").slice(0, max);
@@ -13,6 +15,8 @@ interface PlaceCardProps {
 }
 
 export default function PlaceCard({ place }: PlaceCardProps) {
+  const { toggleHeart, isHearted, getHeartCount } = useFavorites();
+  
   // normalize fields (works for mock + backend)
   const rating =
     typeof place.rating === "number" ? place.rating : 0;
@@ -90,24 +94,12 @@ export default function PlaceCard({ place }: PlaceCardProps) {
     return `http://localhost:8001/api/ai/placeholder/800/400/`;
   })();
 
+
+
   const getMatchScoreColor = (score: number) => {
     if (score >= 90) return "bg-appaccent text-white";
     if (score >= 80) return "bg-appprimary text-foreground";
     return "bg-appsecondary text-foreground";
-  };
-
-  const getImageUrl = (place: any) => {
-    // Check if place has photos and they're valid URLs
-    if (place.photos && Array.isArray(place.photos) && place.photos.length > 0) {
-      const photoUrl = place.photos[0];
-      // Check if it's a valid URL (starts with http)
-      if (typeof photoUrl === 'string' && photoUrl.startsWith('http')) {
-        return photoUrl;
-      }
-    }
-    
-    // Fallback to placeholder image
-    return `http://localhost:8001/api/ai/placeholder/800/400/`;
   };
 
   return (
@@ -124,10 +116,42 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             // Use our Django placeholder endpoint as fallback
             (e.currentTarget as HTMLImageElement).src = `http://localhost:8001/api/ai/placeholder/800/400/`;
           }}
+          onLoad={(e) => {
+            // Image loaded successfully - remove any error handlers to prevent infinite loops
+            const img = e.currentTarget as HTMLImageElement;
+            img.onerror = null;
+          }}
         />
+        
+        {/* Heart Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleHeart(place.id, place.name);
+          }}
+          className="absolute top-3 left-3 z-20 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full p-2 hover:scale-110 transition-all duration-200 shadow-lg"
+        >
+          <Heart
+            className={`h-5 w-5 ${
+              isHearted(place.id)
+                ? "text-red-500 fill-current"
+                : "text-gray-400 hover:text-red-400"
+            }`}
+          />
+        </button>
+        
+        {/* Match Score Badge */}
         <Badge className={`absolute top-3 right-3 ${getMatchScoreColor(matchScore)}`}>
           {matchScore}% match
         </Badge>
+        
+        {/* Heart Count Badge */}
+        <div className="absolute bottom-3 left-3">
+          <div className="bg-red-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center space-x-1">
+            <Heart className="h-3 w-3 fill-current" />
+            <span>{getHeartCount(place.id)}</span>
+          </div>
+        </div>
       </div>
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
@@ -166,6 +190,9 @@ export default function PlaceCard({ place }: PlaceCardProps) {
             <span className="text-appprimary">→</span>
           </div>
         </div>
+        
+        {/* Reviews Section */}
+        <ReviewsSection place={place} />
       </CardContent>
     </Card>
   );
