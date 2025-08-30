@@ -132,3 +132,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom gentle wiggle animation for logo */
+@keyframes gentle-wiggle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(2px) rotate(-2deg);
+  }
+}
+
+.animate-gentle-wiggle {
+  animation: gentle-wiggle 4s ease-in-out infinite;
+  animation-delay: 2s; /* Start after 2 seconds */
+}

@@ -51,7 +51,7 @@ export default function Header() {
             <img 
               src={logo} 
               alt="Matcha Match Logo" 
-              className="h-16 w-16 cursor-pointer hover:scale-110 transition-transform duration-200" 
+              className="h-16 w-16 cursor-pointer hover:scale-110 transition-transform duration-200 animate-gentle-wiggle" 
               onClick={() => navigate("/")}
               title="Click to return to home"
             />
