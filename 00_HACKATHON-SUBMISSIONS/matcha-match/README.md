@@ -3,8 +3,8 @@
 ## 🏆 OpenxAI Global AI Accelerator 2025 Hackathon Submission
 
 **Track**: Social Network + Textstream (Sentiment Analysis)  
-**Team**: Fizzafatima  
-**University**: [Your University]  
+**Team**: Fizzafatima , Hiba Wajeeh, Jeyasri , Romy Dobbie
+**University**: The University of Sydney
 **Project**: MatchaMatch - Connecting people with their perfect matcha experience through AI and sentiment analysis
 
 ## 🎯 Project Overview
@@ -18,6 +18,8 @@ MatchaMatch is an intelligent application that helps users find their perfect ma
 - **🗺️ Google Maps Integration**: Real-time location-based recommendations
 - **💬 Intelligent Chat Interface**: Conversational AI recommendations
 - **🎯 Personalized Matching**: Learns from user preferences and interactions
+- **❤️ Favorites System**: Heart and save your favorite matcha spots
+- **⭐ Reviews & Ratings**: Share your experiences and read others' reviews
 - **📱 Modern Web App**: Beautiful, responsive interface built with React + Django
 
 ### 🧠 AI Integration
@@ -44,7 +46,7 @@ cd matcha-match
 
 # 2. Set up Python environment and install dependencies
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # 3. Set up frontend dependencies
@@ -143,6 +145,11 @@ DEBUG=True
 - **API-first design**
 - **Modern development practices**
 
+### ✅ Social Features (NEW!)
+- **❤️ Favorites System** - Heart and save favorite matcha spots
+- **⭐ Reviews & Ratings** - Community-driven feedback system
+- **👥 User Interactions** - Social engagement through place recommendations
+
 ## 🚀 Future Enhancements
 
 - **Machine learning** for better recommendations
@@ -153,7 +160,15 @@ DEBUG=True
 
 ## 📱 Demo Video
 
-[Link to your demo video showing the app in action]
+**🎥 Demo Video**: [Add your YouTube link here showing the app in action]
+
+**📋 What to demonstrate in your video:**
+1. **App Overview** - Show the main interface and explain the concept
+2. **Favorites Feature** - Demonstrate hearting places and viewing favorites page
+3. **Reviews System** - Show adding reviews and viewing them
+4. **AI Chat** - Demonstrate the conversational interface
+5. **Real-time Features** - Show the app working with live data
+6. **Why It Should Win** - Explain the innovation and real-world impact
 
 ## 🏆 Why This Should Win
 
@@ -173,9 +188,42 @@ This is a hackathon submission for the OpenxAI Global AI Accelerator 2025. The p
 - **Real-world application** development
 - **Professional software engineering** practices
 
+## 🚨 Troubleshooting
+
+### Common Issues & Solutions
+
+**❌ "Module not found" errors**
+```bash
+# Make sure you're in the virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+**❌ "npm install" fails**
+```bash
+# Clear npm cache and try again
+npm cache clean --force
+npm install
+```
+
+**❌ Backend won't start**
+```bash
+# Check if port 8000 is in use
+lsof -i :8000  # On Windows: netstat -ano | findstr :8000
+# Kill the process or use a different port
+python manage.py runserver 8001
+```
+
+**❌ Frontend won't start**
+```bash
+# Check if port 3000/8081 is in use
+lsof -i :3000  # On Windows: netstat -ano | findstr :3000
+# The app will automatically find an available port
+```
+
 ## 📞 Support
 
-For questions about this submission, contact: [Your Contact Information]
+For questions about this submission, contact: thefizzafatima@gmail.com
 
 ---
 
