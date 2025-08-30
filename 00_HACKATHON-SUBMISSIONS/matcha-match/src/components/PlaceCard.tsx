@@ -86,24 +86,28 @@ export default function PlaceCard({ place }: PlaceCardProps) {
       return place.photos[0]; // Use first photo from array
     }
     
-    // Create attractive fallback images based on café name
-    const cafeName = place.name || 'Matcha';
-    const fallbackColors = [
-      '4ade80', // Green
-      '22c55e', // Darker green
-      '16a34a', // Forest green
-      '15803d', // Deep green
-      '166534'  // Very dark green
-    ];
-    const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
-    
-    return `https://via.placeholder.com/800x400/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
+    // Use our Django placeholder endpoint as fallback
+    return `http://localhost:8001/api/ai/placeholder/800/400/`;
   })();
 
   const getMatchScoreColor = (score: number) => {
     if (score >= 90) return "bg-appaccent text-white";
     if (score >= 80) return "bg-appprimary text-foreground";
     return "bg-appsecondary text-foreground";
+  };
+
+  const getImageUrl = (place: any) => {
+    // Check if place has photos and they're valid URLs
+    if (place.photos && Array.isArray(place.photos) && place.photos.length > 0) {
+      const photoUrl = place.photos[0];
+      // Check if it's a valid URL (starts with http)
+      if (typeof photoUrl === 'string' && photoUrl.startsWith('http')) {
+        return photoUrl;
+      }
+    }
+    
+    // Fallback to placeholder image
+    return `http://localhost:8001/api/ai/placeholder/800/400/`;
   };
 
   return (
@@ -117,12 +121,8 @@ export default function PlaceCard({ place }: PlaceCardProps) {
           alt={text(place.name)}
           className="w-full h-48 object-cover"
           onError={(e) => {
-            // Create a better fallback image with the café name
-            const cafeName = place.name || 'Matcha';
-            const fallbackColors = ['FFFDF6', 'FAF6E9', 'DDEB9D', 'A0C878'];
-            const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
-            (e.currentTarget as HTMLImageElement).src = 
-              `https://via.placeholder.com/800x400/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
+            // Use our Django placeholder endpoint as fallback
+            (e.currentTarget as HTMLImageElement).src = `http://localhost:8001/api/ai/placeholder/800/400/`;
           }}
         />
         <Badge className={`absolute top-3 right-3 ${getMatchScoreColor(matchScore)}`}>
@@ -142,7 +142,7 @@ export default function PlaceCard({ place }: PlaceCardProps) {
         <div className="flex items-center space-x-4 text-sm text-foreground/70 mb-3">
           <div className="flex items-center space-x-1">
             <DollarSign className="h-4 w-4" />
-            <span>{place.priceRange || "$$"}</span>
+            <span>{priceRange}</span>
           </div>
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />

@@ -73,7 +73,7 @@ export class PlacesService {
       address: place.vicinity || "Address not available",
       lat: lat,
       lng: lng,
-      image: place.photos?.[0]?.getUrl({ maxWidth: 300, maxHeight: 200 }) || "/api/placeholder/300/200",
+      image: place.photos?.[0]?.getUrl({ maxWidth: 300, maxHeight: 200 }) || "http://localhost:8001/api/ai/placeholder/300/200",
       tags: tags
     };
   }

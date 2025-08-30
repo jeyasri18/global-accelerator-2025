@@ -9,7 +9,7 @@ import { mockMatchaPlaces, MatchaPlace } from "@/data/mockMatcha";
 import { useToast } from "@/hooks/use-toast";
 
 // CHANGED: keep a single place to define your API base
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001/api";
 
 // helpers
 const toDollar = (n?: number | null) =>
@@ -104,7 +104,7 @@ export default function Index() {
         distance: typeof p.distance === "number" ? p.distance : 0,
         matchScore: typeof p.match_score === "number" ? p.match_score : fakeScore(),
         address: (p.vicinity ?? p.address ?? "") as string,
-        photoUrl: Array.isArray(p.photos) && p.photos.length ? p.photos[0] : undefined,
+        photos: Array.isArray(p.photos) && p.photos.length ? p.photos : [`http://localhost:8001/api/ai/placeholder/400/200/`],
         openNow: p.open_now ?? p.opening_hours?.open_now ?? undefined,
       }));
 

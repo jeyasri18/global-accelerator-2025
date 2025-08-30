@@ -53,7 +53,7 @@ const TopPlacesCarousel: React.FC = () => {
     const fetchTopPlaces = async () => {
       try {
         console.log('Fetching places for location:', userLocation);
-        const response = await fetch(`http://localhost:8000/api/places/?lat=${userLocation.lat}&lng=${userLocation.lng}`);
+        const response = await fetch(`http://localhost:8001/api/places/?lat=${userLocation.lat}&lng=${userLocation.lng}`);
         console.log('API response status:', response.status);
         
         if (response.ok) {
@@ -290,14 +290,14 @@ const TopPlacesCarousel: React.FC = () => {
         <div className="relative h-64 w-full overflow-hidden">
           {currentPlace.photos && currentPlace.photos.length > 0 ? (
             <img
-              src={currentPlace.photos[0]}
+              src={currentPlace.photos && currentPlace.photos.length > 0 ? currentPlace.photos[0] : `http://localhost:8001/api/ai/placeholder/400/256/`}
               alt={currentPlace.name}
               className="w-full h-full object-cover"
               onError={(e) => {
                 const fallbackColors = ['FFFDF6', 'FAF6E9', 'DDEB9D', 'A0C878'];
                 const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
                 (e.currentTarget as HTMLImageElement).src =
-                  `https://via.placeholder.com/400x256/${randomColor}/ffffff?text=${encodeURIComponent(currentPlace.name)}`;
+                  `http://localhost:8001/api/ai/placeholder/400/256/`;
               }}
               onLoad={() => console.log('Image loaded successfully:', currentPlace.photos?.[0])}
             />

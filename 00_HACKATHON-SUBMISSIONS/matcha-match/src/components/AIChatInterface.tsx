@@ -243,7 +243,7 @@ const AIChatInterface: React.FC = () => {
                       {cafe.photos && cafe.photos.length > 0 ? (
                         <div className="relative h-32 overflow-hidden">
                           <img
-                            src={cafe.photos[0]}
+                            src={cafe.photos && cafe.photos.length > 0 ? cafe.photos[0] : `http://localhost:8001/api/ai/placeholder/400/200/`}
                             alt={cafe.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
@@ -251,7 +251,7 @@ const AIChatInterface: React.FC = () => {
                               const fallbackColors = ['4ade80', '22c55e', '16a34a', '15803d', '166534'];
                               const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
                               (e.currentTarget as HTMLImageElement).src =
-                                `https://via.placeholder.com/400x200/${randomColor}/ffffff?text=${encodeURIComponent(cafeName)}`;
+                                `http://localhost:8001/api/ai/placeholder/400/200/`;
                             }}
                           />
                           {/* AI Rank Badge */}

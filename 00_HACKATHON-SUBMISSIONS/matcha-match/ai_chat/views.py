@@ -73,7 +73,7 @@ def chat_with_ai(request):
                     print(f"Using default location (Darling Harbour): {search_lat}, {search_lng}")
                 
                 # Search for places using the determined coordinates
-                places_response = requests.get(f'http://localhost:8000/api/places/?lat={search_lat}&lng={search_lng}&sentiment={sentiment}', timeout=10)
+                places_response = requests.get(f'http://localhost:8001/api/places/?lat={search_lat}&lng={search_lng}&sentiment={sentiment}', timeout=10)
                 
                 if places_response.status_code == 200:
                     places = places_response.json()
@@ -370,7 +370,7 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
         import requests
         
         try:
-            response = requests.get(f'http://localhost:8000/api/places/?lat={lat}&lng={lng}', timeout=10)
+            response = requests.get(f'http://localhost:8001/api/places/?lat={lat}&lng={lng}', timeout=10)
             
             if response.status_code == 200:
                 places = response.json()
@@ -756,7 +756,7 @@ def test_ai_enhancement(request):
         
         # Test 2: Get places from API
         print("2. Getting places from API...")
-        places_response = requests.get(f'http://localhost:8000/api/places/?lat={test_lat}&lng={test_lng}&sentiment={test_sentiment}', timeout=10)
+        places_response = requests.get(f'http://localhost:8001/api/places/?lat={test_lat}&lng={test_lng}&sentiment={test_sentiment}', timeout=10)
         print(f"   API status: {places_response.status_code}")
         
         if places_response.status_code == 200:
@@ -792,6 +792,74 @@ def test_ai_enhancement(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+def generate_placeholder_image(request, width, height):
+    """Generate a simple placeholder image with specified dimensions"""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        import io
+        
+        # Create a new image with the specified dimensions
+        img = Image.new('RGB', (int(width), int(height)), color='#f0f0f0')
+        draw = ImageDraw.Draw(img)
+        
+        # Try to use a default font, fallback to basic if not available
+        try:
+            # Try multiple font paths for different systems
+            font_paths = [
+                "/System/Library/Fonts/Arial.ttf",  # macOS
+                "/System/Library/Fonts/Helvetica.ttc",  # macOS alternative
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+                "C:/Windows/Fonts/arial.ttf",  # Windows
+            ]
+            
+            font = None
+            for font_path in font_paths:
+                try:
+                    font = ImageFont.truetype(font_path, min(20, int(min(width, height) / 10)))
+                    break
+                except:
+                    continue
+            
+            if font is None:
+                font = ImageFont.load_default()
+                
+        except Exception as e:
+            print(f"Font loading error: {e}")
+            font = ImageFont.load_default()
+        
+        # Add text to the image
+        text = f"{width}x{height}"
+        text_bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+        
+        # Center the text
+        x = (int(width) - text_width) // 2
+        y = (int(height) - text_height) // 2
+        
+        # Draw text with a dark color
+        draw.text((x, y), text, fill='#666666', font=font)
+        
+        # Convert to bytes
+        img_io = io.BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        
+        from django.http import HttpResponse
+        response = HttpResponse(img_io.getvalue(), content_type='image/png')
+        response['Cache-Control'] = 'public, max-age=31536000'  # Cache for 1 year
+        return response
+        
+    except Exception as e:
+        print(f"Error generating placeholder image: {e}")
+        # Return a simple 1x1 pixel image as fallback
+        from django.http import HttpResponse
+        response = HttpResponse(
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc```\x00\x00\x00\x04\x00\x01\xf6\x178U\x00\x00\x00\x00IEND\xaeB`\x82',
+            content_type='image/png'
+        )
+        return response
 
 def extract_location_from_message(message):
     """Extract location names from user messages and convert to coordinates"""
