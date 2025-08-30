@@ -48,7 +48,13 @@ export default function Header() {
           
           {/* Center - Logo and Title */}
           <h1 className="col-span-1 text-center text-3xl font-bold text-foreground tracking-wide flex flex-col items-center justify-center space-y-2">
-            <img src={logo} alt="Matcha Match Logo" className="h-16 w-16" />
+            <img 
+              src={logo} 
+              alt="Matcha Match Logo" 
+              className="h-16 w-16 cursor-pointer hover:scale-110 transition-transform duration-200" 
+              onClick={() => navigate("/")}
+              title="Click to return to home"
+            />
             <span className="font-cute text-foreground">Matcha Match</span>
           </h1>
           
