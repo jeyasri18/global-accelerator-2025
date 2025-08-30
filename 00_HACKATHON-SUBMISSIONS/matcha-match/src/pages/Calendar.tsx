@@ -5,6 +5,31 @@ import Header from "@/components/Header";
 import { Trophy, Flame, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import matchaIcon from "@/assets/matcha.svg";
 
+// Import all 10 matcha images
+import img1 from "@/assets/matcha_images/1.jpg";
+import img2 from "@/assets/matcha_images/2.jpg";
+import img3 from "@/assets/matcha_images/3.jpg";
+import img4 from "@/assets/matcha_images/4.jpg";
+import img5 from "@/assets/matcha_images/5.jpg";
+import img6 from "@/assets/matcha_images/6.jpg";
+import img7 from "@/assets/matcha_images/7.jpg";
+import img8 from "@/assets/matcha_images/8.jpg";
+import img9 from "@/assets/matcha_images/9.jpg";
+import img10 from "@/assets/matcha_images/10.jpg";
+
+const matchaImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
+
+// Function to get image for a specific day (deterministic assignment)
+function getImageForDay(day: number) {
+  return matchaImages[day % matchaImages.length];
+}
+
+// Function to get image for a specific date
+function getImageForDate(date: Date) {
+  const day = date.getDate();
+  return getImageForDay(day);
+}
+
 // Simulate matcha days with localStorage (or use mock data)
 function getMatchaDays() {
   const data = localStorage.getItem("matcha_days");
@@ -80,12 +105,82 @@ function getCurrentStreak(days: string[]) {
   return streak;
 }
 
+// Function to check if a specific date is part of a streak
+function checkIfInStreak(dateStr: string) {
+  const days = getMatchaDays();
+  if (!days.length) return false;
+  
+  const sorted = days.map(d => new Date(d)).sort((a, b) => a.getTime() - b.getTime());
+  const targetDate = new Date(dateStr);
+  
+  // Find the target date in the sorted array
+  const targetIndex = sorted.findIndex(d => isSameDay(d, targetDate));
+  if (targetIndex === -1) return false;
+  
+  // Check if it's part of a consecutive sequence
+  let isStreak = false;
+  
+  // Check forward streak
+  for (let i = targetIndex; i < sorted.length - 1; i++) {
+    const current = sorted[i];
+    const next = sorted[i + 1];
+    const diff = (next.getTime() - current.getTime()) / (1000 * 60 * 60 * 24);
+    if (diff === 1) {
+      isStreak = true;
+    } else {
+      break;
+    }
+  }
+  
+  // Check backward streak
+  for (let i = targetIndex; i > 0; i--) {
+    const current = sorted[i];
+    const previous = sorted[i - 1];
+    const diff = (current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24);
+    if (diff === 1) {
+      isStreak = true;
+    } else {
+      break;
+    }
+  }
+  
+  return isStreak;
+}
+
 export default function CalendarPage() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<Date | undefined>(undefined);
   const [matchaDays, setMatchaDays] = useState<string[]>(getMatchaDays());
   const highestStreak = getStreak(matchaDays);
   const currentStreak = getCurrentStreak(matchaDays);
+
+  // Add custom CSS to force calendar tile sizes
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .rdp-button {
+        width: 128px !important;
+        height: 128px !important;
+        min-width: 128px !important;
+        min-height: 128px !important;
+        max-width: 128px !important;
+        max-height: 128px !important;
+      }
+      .rdp-td {
+        width: 128px !important;
+        height: 128px !important;
+        min-width: 128px !important;
+        min-height: 128px !important;
+        max-width: 128px !important;
+        max-height: 128px !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   useEffect(() => {
     setMatchaDays(getMatchaDays());
@@ -124,13 +219,13 @@ export default function CalendarPage() {
                   <div className="w-24 h-1 bg-appbg/60 rounded-full mx-auto"></div>
                 </div>
 
-        {/* Enhanced Calendar Container - Soft Green Background */}
-        <div className="bg-gradient-to-br from-green-50 via-green-100 to-green-200 rounded-3xl p-8 md:p-12 shadow-2xl border border-green-300/30">
+        {/* Enhanced Calendar Container - Layered Card Background */}
+        <div className="bg-green-50 rounded-xl p-8 md:p-12 shadow-xl border border-green-300/30">
 
           {/* Calendar Display - 3 Months */}
           <div className="w-full flex justify-center">
             <UICalendar
-              className="w-full max-w-[1400px] [&_.rdp-table]:w-full [&_.rdp-tbody]:w-full [&_.rdp-tr]:w-full [&_.rdp-td]:w-full [&_.rdp-button]:w-full [&_.rdp-button]:h-20 [&_.rdp-button]:text-xl [&_.rdp-button]:font-medium [&_.rdp-button]:rounded-2xl [&_.rdp-button]:shadow-md [&_.rdp-button]:transition-all [&_.rdp-button]:hover:scale-105 [&_.rdp-button]:hover:shadow-lg [&_.rdp-button]:hover:bg-green-50 [&_.rdp-button]:focus:ring-4 [&_.rdp-button]:focus:ring-green-400/30 [&_.rdp-button]:focus:outline-none [&_.rdp-button]:border-2 [&_.rdp-button]:border-transparent [&_.rdp-button]:hover:border-green-400/30 [&_.rdp-caption]:text-3xl [&_.rdp-caption]:font-bold [&_.rdp-caption]:text-green-700 [&_.rdp-head_cell]:text-green-700 [&_.rdp-head_cell]:font-semibold [&_.rdp-head_cell]:text-lg [&_.rdp-head_cell]:pb-4 [&_.rdp-button]:hover:bg-gradient-to-br [&_.rdp-button]:hover:from-green-50 [&_.rdp-button]:hover:to-green-100"
+              className="w-full max-w-[1400px] [&_.rdp-table]:w-full [&_.rdp-tbody]:w-full [&_.rdp-tr]:w-full [&_.rdp-td]:w-full [&_.rdp-button]:!w-32 [&_.rdp-button]:!h-32 [&_.rdp-button]:!min-w-[128px] [&_.rdp-button]:!min-h-[128px] [&_.rdp-button]:text-xl [&_.rdp-button]:font-medium [&_.rdp-button]:rounded-xl [&_.rdp-button]:shadow-md [&_.rdp-button]:transition-all [&_.rdp-button]:hover:scale-105 [&_.rdp-button]:hover:shadow-md [&_.rdp-button]:hover:border-green-400 [&_.rdp-button]:focus:ring-4 [&_.rdp-button]:focus:ring-green-400/30 [&_.rdp-button]:focus:outline-none [&_.rdp-button]:border [&_.rdp-button]:border-green-300 [&_.rdp-button]:hover:border-green-500 [&_.rdp-caption]:text-lg [&_.rdp-caption]:font-semibold [&_.rdp-caption]:text-green-800 [&_.rdp-caption]:pb-3 [&_.rdp-caption]:px-4 [&_.rdp-caption]:py-2 [&_.rdp-caption]:rounded-full [&_.rdp-caption]:bg-green-200/50 [&_.rdp-caption]:shadow-sm [&_.rdp-caption]:mb-6 [&_.rdp-head_cell]:text-green-700 [&_.rdp-head_cell]:font-semibold [&_.rdp-head_cell]:text-lg [&_.rdp-head_cell]:pb-4 [&_.rdp-button]:hover:bg-gradient-to-br [&_.rdp-button]:hover:from-green-50 [&_.rdp-button]:hover:to-green-100"
               mode="single"
               selected={selected}
               onSelect={handleSelect}
@@ -149,26 +244,44 @@ export default function CalendarPage() {
                 Day: ({ date, displayMonth, ...props }) => {
                   const dateStr = toLocalDateString(date);
                   const isMatchaDay = matchaDays.includes(dateStr);
+                  const today = new Date();
+                  const isToday = isSameDay(date, today);
+                  
+                  // Check if this day is part of a streak
+                  const isInStreak = checkIfInStreak(dateStr);
                   
                   return (
                     <div className="relative w-full h-full">
                       <button
                         {...props}
-                        className={`w-full h-full flex items-center justify-center relative ${
-                          isMatchaDay 
-                            ? 'bg-gradient-to-br from-appbg to-appaccent text-white font-bold border-2 border-appaccent shadow-lg' 
-                            : 'hover:bg-green-50 hover:border-green-400/30 hover:shadow-lg'
-                        } rounded-2xl transition-all duration-300 hover:scale-105 focus:ring-4 focus:ring-green-400/30 focus:outline-none border-2 border-transparent group`}
+                        className={`w-full h-full flex items-center justify-center relative rounded-xl overflow-hidden border transition-all duration-300 focus:ring-4 focus:ring-green-400/30 focus:outline-none group ${
+                          isMatchaDay ? "border-green-400" : "border-green-200 bg-green-50"
+                        } ${
+                          isToday ? "ring-4 ring-green-500 shadow-lg" : ""
+                        } ${
+                          isInStreak ? "ring-2 ring-orange-400 ring-opacity-60" : ""
+                        } hover:scale-105 hover:shadow-md hover:border-green-500`}
                       >
-                        <span className="text-xl font-medium relative z-10">{date.getDate()}</span>
-                        
-                        {/* Glow Effect for Matcha Days - No more ugly image */}
-                        {isMatchaDay && (
-                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-appbg/20 to-appaccent/20 blur-sm -z-10 group-hover:blur-md transition-all duration-300"></div>
+                        {isMatchaDay ? (
+                          // Show matcha image for marked days with date overlay
+                          <div className="w-full h-full relative">
+                            <img
+                              src={getImageForDate(date)}
+                              alt="Matcha Day"
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Date overlay on bottom-right corner */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-green-900/30 to-transparent"></div>
+                            <span className="absolute bottom-1 right-1 text-xs font-bold text-white bg-green-900/40 px-1 rounded">
+                              {date.getDate()}
+                            </span>
+                          </div>
+                        ) : (
+                          // Show day number with soft background for unmarked days
+                          <span className="text-gray-700 font-medium">
+                            {date.getDate()}
+                          </span>
                         )}
-                        
-                        {/* Hover Glow Effect for All Days */}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-400/0 to-green-600/0 group-hover:from-green-400/10 group-hover:to-green-600/10 transition-all duration-300 -z-20"></div>
                       </button>
                     </div>
                   );
@@ -182,14 +295,13 @@ export default function CalendarPage() {
             <div className="flex flex-col sm:flex-row gap-6 items-center">
               {/* Highest Streak */}
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-4 rounded-2xl shadow-xl border-2 border-yellow-300 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-md px-6 py-3 border border-yellow-200/50 transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                   <div className="flex items-center space-x-3">
-                    <Trophy className="w-8 h-8 text-yellow-200" />
+                    <span className="text-2xl">🏆</span>
                     <div>
-                      <div className="text-sm font-medium opacity-90">Highest Streak</div>
-                      <div className="text-3xl font-black">{highestStreak}</div>
-                      <div className="text-xs opacity-75">{highestStreak === 1 ? 'day' : 'days'}</div>
+                      <div className="text-sm font-medium text-yellow-800">Highest Streak</div>
+                      <div className="text-3xl font-black text-yellow-900">{highestStreak}</div>
+                      <div className="text-xs text-yellow-700">{highestStreak === 1 ? 'day' : 'days'}</div>
                     </div>
                   </div>
                 </div>
@@ -197,14 +309,13 @@ export default function CalendarPage() {
 
               {/* Current Streak */}
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                <div className="relative bg-gradient-to-r from-red-400 to-pink-500 text-white px-6 py-4 rounded-2xl shadow-xl border-2 border-red-300 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-md px-6 py-3 border border-red-200/50 transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                   <div className="flex items-center space-x-3">
-                    <Flame className="w-8 h-8 text-red-200" />
+                    <span className="text-2xl">🔥</span>
                     <div>
-                      <div className="text-sm font-medium opacity-90">Current Streak</div>
-                      <div className="text-3xl font-black">{currentStreak}</div>
-                      <div className="text-xs opacity-75">{currentStreak === 1 ? 'day' : 'days'}</div>
+                      <div className="text-sm font-medium text-red-800">Current Streak</div>
+                      <div className="text-3xl font-black text-red-900">{currentStreak}</div>
+                      <div className="text-xs text-red-700">{currentStreak === 1 ? 'day' : 'days'}</div>
                     </div>
                   </div>
                 </div>
@@ -213,11 +324,10 @@ export default function CalendarPage() {
               {/* Special Achievement */}
               {highestStreak >= 10 && (
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-r from-purple-400 to-pink-500 text-white px-8 py-4 rounded-2xl shadow-xl border-2 border-purple-300 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-md px-8 py-3 border border-purple-200/50 transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                     <div className="flex items-center space-x-3">
-                      <Star className="w-8 h-8 text-purple-200" />
-                      <span className="text-xl font-black">✨ 10+ Day Streak! You are a Matcha Master! ✨</span>
+                      <Star className="w-8 h-8 text-purple-600" />
+                      <span className="text-xl font-black text-purple-800">✨ 10+ Day Streak! You are a Matcha Master! ✨</span>
                     </div>
                   </div>
                 </div>
