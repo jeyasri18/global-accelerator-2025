@@ -7,6 +7,7 @@ const STORAGE_KEY = 'mm_favorites';
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState<FavoritesData>({});
   const [userHearts, setUserHearts] = useState<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Load favorites from localStorage on mount
   useEffect(() => {
@@ -37,6 +38,60 @@ export const useFavorites = () => {
     }
   }, []);
 
+  // Populate favorites with real places from API if none exist
+  useEffect(() => {
+    if (!isInitialized && Object.keys(favorites).length === 0) {
+      populateWithRealPlaces();
+    }
+  }, [favorites, isInitialized]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Function to populate favorites with real places from API
+  const populateWithRealPlaces = async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001/api";
+      const res = await fetch(`${API_BASE}/places/?lat=-33.8688&lng=151.2093`);
+      
+      if (res.ok) {
+        const data = await res.json();
+        const places = Array.isArray(data) ? data : data.results || [];
+        
+        if (places.length > 0) {
+          // Take the first 5 places and give them some initial hearts
+          const initialFavorites: FavoritesData = {};
+          const heartCounts = [67, 42, 35, 28, 19]; // Different heart counts for variety
+          
+          places.slice(0, 5).forEach((place, index) => {
+            const placeId = place.place_id || place.id || `real_${index}`;
+            const placeName = place.name || `Matcha Place ${index + 1}`;
+            
+            initialFavorites[placeId] = {
+              placeId,
+              placeName,
+              heartsCount: heartCounts[index] || 20,
+              lastHearted: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) // Random date within last week
+            };
+          });
+          
+          console.log('🎯 Populated favorites with real places:', initialFavorites);
+          setFavorites(initialFavorites);
+          setIsInitialized(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to populate favorites with real places:', error);
+      setIsInitialized(true);
+    }
+  };
+
+  // Function to reset favorites (useful for testing)
+  const resetFavorites = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('mm_user_hearts');
+    setFavorites({});
+    setUserHearts(new Set());
+    setIsInitialized(false);
+  }, []);
+
   // Save favorites to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
@@ -51,33 +106,38 @@ export const useFavorites = () => {
   const toggleHeart = useCallback((placeId: string, placeName: string) => {
     setFavorites(prev => {
       const current = prev[placeId];
+      const currentHearts = current?.heartsCount || 0;
       
-      // Get the base heart count from mock data
-      const basePlace = mockMatchaPlaces.find(p => p.id === placeId);
-      const baseHeartsCount = basePlace?.heartsCount || 0;
-      
-      // Calculate new heart count based on user interaction
-      const currentUserHearts = current?.heartsCount || baseHeartsCount;
-      const newHeartsCount = currentUserHearts + (userHearts.has(placeId) ? -1 : 1);
-      
-      // Don't allow heart count to go below base count
-      const finalHeartsCount = Math.max(baseHeartsCount, newHeartsCount);
-      
-      if (finalHeartsCount <= baseHeartsCount && userHearts.has(placeId)) {
-        // Remove user's heart but keep base count
-        const { [placeId]: removed, ...rest } = prev;
-        return rest;
-      }
-
-      return {
-        ...prev,
-        [placeId]: {
-          placeId,
-          placeName,
-          heartsCount: finalHeartsCount,
-          lastHearted: new Date()
+      if (userHearts.has(placeId)) {
+        // User is unhearting - decrease count
+        const newHeartsCount = Math.max(0, currentHearts - 1);
+        
+        if (newHeartsCount === 0) {
+          // Remove the place from favorites if no hearts left
+          const { [placeId]: removed, ...rest } = prev;
+          return rest;
         }
-      };
+        
+        return {
+          ...prev,
+          [placeId]: {
+            ...current!,
+            heartsCount: newHeartsCount,
+            lastHearted: new Date()
+          }
+        };
+      } else {
+        // User is hearting - increase count
+        return {
+          ...prev,
+          [placeId]: {
+            placeId,
+            placeName,
+            heartsCount: currentHearts + 1,
+            lastHearted: new Date()
+          }
+        };
+      }
     });
 
     // Toggle user's personal heart status
@@ -99,52 +159,26 @@ export const useFavorites = () => {
 
   // Get heart count for a place
   const getHeartCount = useCallback((placeId: string) => {
-    // Get the base heart count from mock data
-    const basePlace = mockMatchaPlaces.find(p => p.id === placeId);
-    const baseHeartsCount = basePlace?.heartsCount || 0;
-    
-    // Get any additional hearts from user interactions
-    const userAddedHearts = favorites[placeId]?.heartsCount || 0;
-    
-    // Return the higher of the two (base count or user-modified count)
-    return Math.max(baseHeartsCount, userAddedHearts);
+    // Get heart count from favorites
+    return favorites[placeId]?.heartsCount || 0;
   }, [favorites]);
 
   // Get all favorited places sorted by heart count
   const getFavoritedPlaces = useCallback(() => {
-    // Merge mock data with user favorites
-    const allPlaces = mockMatchaPlaces.map(place => {
-      const userFavorite = favorites[place.id];
-      return {
-        placeId: place.id,
-        placeName: place.name,
-        heartsCount: Math.max(place.heartsCount || 0, userFavorite?.heartsCount || 0),
-        lastHearted: userFavorite?.lastHearted || new Date()
-      };
-    });
-    
-    // Filter to only places with hearts and sort by count
-    return allPlaces
-      .filter(place => place.heartsCount > 0)
+    // Convert favorites object to array and sort by heart count
+    return Object.values(favorites)
       .sort((a, b) => b.heartsCount - a.heartsCount);
   }, [favorites]);
 
   // Get total number of places with hearts
   const getTotalFavoritedPlaces = useCallback(() => {
-    // Count places that have hearts (either from mock data or user interactions)
-    return mockMatchaPlaces.filter(place => {
-      const baseHearts = place.heartsCount || 0;
-      const userHearts = favorites[place.id]?.heartsCount || 0;
-      return Math.max(baseHearts, userHearts) > 0;
-    }).length;
+    return Object.keys(favorites).length;
   }, [favorites]);
 
   // Get total heart count across all places
   const getTotalHeartCount = useCallback(() => {
-    return mockMatchaPlaces.reduce((total, place) => {
-      const baseHearts = place.heartsCount || 0;
-      const userHearts = favorites[place.id]?.heartsCount || 0;
-      return total + Math.max(baseHearts, userHearts);
+    return Object.values(favorites).reduce((total, favorite) => {
+      return total + favorite.heartsCount;
     }, 0);
   }, [favorites]);
 
@@ -156,6 +190,7 @@ export const useFavorites = () => {
     getHeartCount,
     getFavoritedPlaces,
     getTotalFavoritedPlaces,
-    getTotalHeartCount
+    getTotalHeartCount,
+    resetFavorites
   };
 };

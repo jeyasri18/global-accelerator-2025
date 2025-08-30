@@ -7,6 +7,7 @@
     <h1>Clear Matcha Match Storage</h1>
     <button onclick="clearStorage()">Clear All Storage</button>
     <button onclick="showStorage()">Show Current Storage</button>
+    <button onclick="resetFavorites()" style="background-color: #10b981; color: white; padding: 10px; margin: 5px; border: none; border-radius: 5px; cursor: pointer;">🔄 Reset Favorites (Populate with Real Places)</button>
     <div id="output"></div>
 
     <script>
@@ -28,6 +29,12 @@
                 <p><strong>User Hearts:</strong> ${userHearts || 'None'}</p>
                 <p><strong>Reviews:</strong> ${reviews || 'None'}</p>
             `;
+        }
+
+        function resetFavorites() {
+            localStorage.removeItem('mm_favorites');
+            localStorage.removeItem('mm_user_hearts');
+            alert('Favorites reset! The app will now populate with real places from the API. Refresh the main app.');
         }
 
         // Show current storage on load

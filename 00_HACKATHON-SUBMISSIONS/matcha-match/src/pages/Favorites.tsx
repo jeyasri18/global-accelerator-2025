@@ -6,27 +6,93 @@ import PlaceCard from "@/components/PlaceCard";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useReviews } from "@/hooks/useReviews";
 import { mockMatchaPlaces } from "@/data/mockMatcha";
+import { useEffect, useState } from "react";
 
 export default function Favorites() {
   const navigate = useNavigate();
   const { getFavoritedPlaces, getTotalFavoritedPlaces, getTotalHeartCount } = useFavorites();
   const { getTotalReviews } = useReviews();
   
+  const [realPlaces, setRealPlaces] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const favoritedPlaces = getFavoritedPlaces();
   const totalFavorited = getTotalFavoritedPlaces();
-  const totalHeartCount = getTotalHeartCount();
+    const totalHeartCount = getTotalHeartCount();
   const totalReviews = getTotalReviews();
-
-  // Get full place data for favorited places
+  
+  // Fetch real places data from backend
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8001/api";
+        const res = await fetch(`${API_BASE}/places/?lat=-33.8688&lng=151.2093`);
+        if (res.ok) {
+          const data = await res.json();
+          const rawPlaces = Array.isArray(data) ? data : data.results || [];
+          console.log('🔍 Raw places fetched:', rawPlaces);
+          
+          // Use the SAME mapping logic as the main page
+          const mappedPlaces = rawPlaces.map((p: any) => ({
+            id: p.id ?? p.place_id ?? crypto.randomUUID(),
+            name: p.name ?? "Unknown",
+            lat: p.lat ?? p.geometry?.location?.lat ?? -33.8688,
+            lng: p.lng ?? p.geometry?.location?.lng ?? 151.2093,
+            rating: typeof p.rating === "number" ? p.rating : 0,
+            priceRange: p.price_range ? "$".repeat(Math.min(4, Math.max(1, p.price_range))) : "$$",
+            distance: typeof p.distance === "number" ? p.distance : 0,
+            matchScore: typeof p.match_score === "number" ? p.match_score : Math.floor(80 + Math.random() * 20),
+            address: (p.vicinity ?? p.address ?? "") as string,
+            photos: Array.isArray(p.photos) && p.photos.length ? p.photos : [`http://localhost:8001/api/ai/placeholder/400/200/`],
+            openNow: p.open_now ?? p.opening_hours?.open_now ?? undefined,
+            tags: p.types || ["matcha", "cafe"],
+          }));
+          
+          console.log('🔍 Mapped places:', mappedPlaces);
+          setRealPlaces(mappedPlaces);
+        }
+      } catch (error) {
+        console.error('Failed to fetch places:', error);
+        // Fallback to mock data if backend fails
+        setRealPlaces(mockMatchaPlaces);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPlaces();
+  }, []);
+  
+  // Get full place data for favorited places (use real data if available)
   const placesWithData = favoritedPlaces.map(favorite => {
-    const placeData = mockMatchaPlaces.find(p => p.id === favorite.placeId);
+    console.log('🔍 Processing favorite:', favorite);
+    console.log('🔍 Looking for place name:', favorite.placeName);
+    console.log('🔍 Available real places:', realPlaces.map(p => ({ id: p.id, name: p.name })));
+    
+    // Try to find place in real data by NAME (more reliable than ID)
+    const placeData = realPlaces.find(p => p.name === favorite.placeName);
+    
     if (placeData) {
+      console.log('✅ Found real place data:', placeData);
       return {
         ...placeData,
         heartsCount: favorite.heartsCount,
         isHearted: true
       };
     }
+    
+    // Fallback to mock data if not found in real data
+    const mockPlaceData = mockMatchaPlaces.find(p => p.id === favorite.placeId);
+    if (mockPlaceData) {
+      console.log('⚠️ Using mock place data:', mockPlaceData);
+      return {
+        ...mockPlaceData,
+        heartsCount: favorite.heartsCount,
+        isHearted: true
+      };
+    }
+    
+    console.log('❌ No place data found for favorite:', favorite);
     return null;
   }).filter(Boolean);
 
@@ -95,7 +161,14 @@ export default function Favorites() {
         </div>
 
         {/* Places Grid */}
-        {placesWithData.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-foreground font-cute">Loading favorite places...</p>
+            </div>
+          </div>
+        ) : placesWithData.length > 0 ? (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-foreground">
