@@ -143,12 +143,6 @@ export default function Index() {
         </div>
         <div className="flex justify-center mb-6 space-x-4">
           <ViewToggle currentView={currentView} onViewChange={setCurrentView} />
-          <button
-            onClick={() => navigate("/calendar")}
-            className="bg-primary hover:bg-primary/80 text-foreground font-semibold py-2 px-4 rounded-lg transition font-cute"
-          >
-            View Matcha Calendar
-          </button>
         </div>
         {loading ? (
           <div className="flex justify-center items-center py-12">

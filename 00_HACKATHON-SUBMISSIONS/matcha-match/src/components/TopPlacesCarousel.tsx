@@ -61,10 +61,10 @@ const TopPlacesCarousel: React.FC = () => {
           console.log('Got places from API:', places.length);
           console.log('First place data:', places[0]);
           
-          // Take top 4 places by rating
+          // Take top 6 places by rating for better carousel experience
           const topRated = places
             .sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
-            .slice(0, 4)
+            .slice(0, 6)
             .map((place: any) => {
               console.log('Processing place:', place.name, 'Photos:', place.photos);
               return {
@@ -99,42 +99,70 @@ const TopPlacesCarousel: React.FC = () => {
             address: 'NW.05/10 Steam Mill La, Haymarket',
             rating: 4.8,
             price_level: '$$',
-            distance: 0.8,
+            distance: 0.2,
+            photos: [],
             lat: -33.8688,
             lng: 151.2093
           },
           {
             id: '2',
             place_id: '2',
-            name: 'Zensation Tea House',
-            address: 'Shop 82/788 Bourke St, Waterloo',
-            rating: 4.9,
-            price_level: '$$',
-            distance: 2.0,
-            lat: -33.9014,
-            lng: 151.2076
+            name: 'Matcha House',
+            address: '123 George St, Sydney',
+            rating: 4.6,
+            price_level: '$$$',
+            distance: 0.5,
+            photos: [],
+            lat: -33.8688,
+            lng: 151.2093
           },
           {
             id: '3',
             place_id: '3',
-            name: 'Oh!Matcha',
-            address: 'Shop 11/501 George St, Sydney',
-            rating: 4.7,
-            price_level: '$',
-            distance: 0.4,
-            lat: -33.8728,
-            lng: 151.2062
+            name: 'Green Tea Garden',
+            address: '456 Pitt St, Sydney',
+            rating: 4.4,
+            price_level: '$$',
+            distance: 0.8,
+            photos: [],
+            lat: -33.8688,
+            lng: 151.2093
           },
           {
             id: '4',
             place_id: '4',
-            name: 'Cafe Maru',
-            address: '189 Kent St, Sydney',
-            rating: 4.9,
+            name: 'Zen Matcha',
+            address: '789 Market St, Sydney',
+            rating: 4.7,
+            price_level: '$$$',
+            distance: 1.2,
+            photos: [],
+            lat: -33.8688,
+            lng: 151.2093
+          },
+          {
+            id: '5',
+            place_id: '5',
+            name: 'Pure Matcha',
+            address: '321 Oxford St, Sydney',
+            rating: 4.5,
             price_level: '$$',
-            distance: 0.5,
-            lat: -33.8705,
-            lng: 151.2047
+            distance: 1.5,
+            photos: [],
+            lat: -33.8688,
+            lng: 151.2093
+          },
+          {
+            id: '6',
+            place_id: '6',
+            name: 'Artisan Matcha',
+            address: '654 Crown St, Sydney',
+            rating: 4.9,
+            price_level: '$$$$',
+            distance: 2.0,
+            photos: [],
+            lat: -33.8688,
+            lng: 151.2093
           }
         ]);
       } finally {
@@ -145,26 +173,27 @@ const TopPlacesCarousel: React.FC = () => {
     fetchTopPlaces();
   }, [userLocation]);
 
-  // Auto-rotate every 4 seconds
+  // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying || topPlaces.length === 0) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % topPlaces.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % Math.max(1, topPlaces.length - 2));
     }, 4000);
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, topPlaces.length]);
 
   const nextPlace = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % topPlaces.length);
+    const maxIndex = Math.max(0, topPlaces.length - 3);
+    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, maxIndex));
     setIsAutoPlaying(false);
     // Resume auto-play after 10 seconds of manual interaction
     setTimeout(() => setIsAutoPlaying(true), 10000);
   };
 
   const prevPlace = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + topPlaces.length) % topPlaces.length);
+    setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
     setIsAutoPlaying(false);
     // Resume auto-play after 10 seconds of manual interaction
     setTimeout(() => setIsAutoPlaying(true), 10000);
@@ -231,42 +260,25 @@ const TopPlacesCarousel: React.FC = () => {
     );
   }
 
-  const currentPlace = topPlaces[currentIndex];
+  // Show 3 places at a time
+  const visiblePlaces = topPlaces.slice(currentIndex, currentIndex + 3);
+  const canGoNext = currentIndex < topPlaces.length - 3;
+  const canGoPrev = currentIndex > 0;
 
   return (
-    <div className="relative max-w-2xl mx-auto">
+    <div className="relative w-full px-4">
       {/* Location Info */}
       {userLocation && (
         <div className="text-center mb-4">
           <p className="text-sm text-gray-600">
             📍 Showing places near your location
           </p>
-          <div className="flex justify-center space-x-2 mt-2">
-            <button
-              onClick={() => {
-                setUserLocation({ lat: -33.8688, lng: 151.2093 }); // Sydney
-                setLoading(true);
-              }}
-              className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
-            >
-              Test Sydney
-            </button>
-            <button
-              onClick={() => {
-                setUserLocation({ lat: 37.7749, lng: -122.4194 }); // San Francisco
-                setLoading(true);
-              }}
-              className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200"
-            >
-              Test SF
-            </button>
-          </div>
         </div>
       )}
 
       {/* Navigation Dots */}
       <div className="flex justify-center space-x-2 mb-6">
-        {topPlaces.map((_, index) => (
+        {Array.from({ length: Math.max(1, topPlaces.length - 2) }, (_, index) => (
           <button
             key={index}
             onClick={() => {
@@ -281,84 +293,102 @@ const TopPlacesCarousel: React.FC = () => {
         ))}
       </div>
 
-      {/* Main Card - Fixed Dimensions */}
-      <div 
-        className="bg-card rounded-2xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 w-full h-[500px] flex flex-col"
-        onClick={() => openInGoogleMaps(currentPlace)}
-      >
-        {/* Photo Section - Fixed Height */}
-        <div className="relative h-64 w-full overflow-hidden">
-          {currentPlace.photos && currentPlace.photos.length > 0 ? (
-            <img
-              src={currentPlace.photos && currentPlace.photos.length > 0 ? currentPlace.photos[0] : `http://localhost:8001/api/ai/placeholder/400/256/`}
-              alt={currentPlace.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const fallbackColors = ['FFFDF6', 'FAF6E9', 'DDEB9D', 'A0C878'];
-                const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
-                (e.currentTarget as HTMLImageElement).src =
-                  `http://localhost:8001/api/ai/placeholder/400/256/`;
-              }}
-              onLoad={() => console.log('Image loaded successfully:', currentPlace.photos?.[0])}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-appprimary to-appaccent flex items-center justify-center">
-              <div className="text-center">
-                <Coffee className="w-20 h-20 text-appaccent mx-auto mb-3" />
-                <p className="text-xl font-semibold text-foreground">{currentPlace.name}</p>
-                <p className="text-sm text-appprimary mt-2">No photo available</p>
+      {/* Carousel Container */}
+      <div className="relative overflow-hidden">
+        {/* Navigation Arrows - Only show if there are more than 3 places */}
+        {topPlaces.length > 3 && (
+          <>
+            <button
+              onClick={prevPlace}
+              disabled={!canGoPrev}
+              className={`absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
+                canGoPrev ? 'hover:bg-card cursor-pointer' : 'opacity-50 cursor-not-allowed'
+              }`}
+            >
+              <ChevronLeft className="w-6 h-6 text-appaccent" />
+            </button>
+            <button
+              onClick={nextPlace}
+              disabled={!canGoNext}
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg transition-all hover:scale-110 ${
+                canGoNext ? 'hover:bg-card cursor-pointer' : 'opacity-50 cursor-not-allowed'
+              }`}
+            >
+              <ChevronRight className="w-6 h-6 text-appaccent" />
+            </button>
+          </>
+        )}
+
+        {/* Places Grid - 3 columns with much bigger cards */}
+        <div className="grid grid-cols-3 gap-8">
+          {visiblePlaces.map((place, index) => (
+            <div
+              key={place.id}
+              className="bg-card rounded-2xl shadow-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 h-[600px] flex flex-col"
+              onClick={() => openInGoogleMaps(place)}
+            >
+              {/* Photo Section - Much bigger height */}
+              <div className="relative h-80 w-full overflow-hidden">
+                {place.photos && place.photos.length > 0 ? (
+                  <img
+                    src={place.photos[0]}
+                    alt={place.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        `http://localhost:8001/api/ai/placeholder/400/200/`;
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-appprimary to-appaccent flex items-center justify-center">
+                    <div className="text-center">
+                      <Coffee className="w-24 h-24 text-appaccent mx-auto mb-4" />
+                      <p className="text-2xl font-semibold text-foreground">{place.name}</p>
+                      <p className="text-base text-appprimary mt-2">No photo available</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Price Badge - Top Right */}
+                <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                  <span className="text-base font-semibold text-appprimary">{place.price_level}</span>
+                </div>
+                
+                {/* Rating Badge - Top Left */}
+                <div className="absolute top-4 left-4 bg-appaccent/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
+                  <div className="flex items-center space-x-2">
+                    <Star className="w-5 h-5 text-appprimary fill-current" />
+                    <span className="text-base font-semibold text-white">{place.rating}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Content Section - Bigger padding and text */}
+              <div className="p-8 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold text-foreground mb-4 line-clamp-2">{place.name}</h3>
+                  <div className="flex items-center space-x-3 text-foreground mb-4">
+                    <MapPin className="w-5 h-5 text-appaccent flex-shrink-0" />
+                    <span className="text-base line-clamp-2">{place.address}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base text-foreground bg-appprimary/40 px-4 py-2 rounded-full">
+                      {place.distance} km away
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-base text-appaccent font-medium bg-card px-4 py-2 rounded-full">
+                      Click to open in Google Maps →
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
-          {/* Price Badge - Top Right */}
-          <div className="absolute top-4 right-4 bg-card/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-            <span className="text-sm font-semibold text-appprimary">{currentPlace.price_level}</span>
-          </div>
-          {/* Rating Badge - Top Left */}
-          <div className="absolute top-4 left-4 bg-appaccent/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-md">
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 text-appprimary fill-current" />
-              <span className="text-sm font-semibold text-white">{currentPlace.rating}</span>
-            </div>
-          </div>
+          ))}
         </div>
-        {/* Content Section - Fixed Height */}
-        <div className="p-6 flex-1 flex flex-col justify-between">
-          {/* Top Content */}
-          <div>
-            <h3 className="text-2xl font-bold text-foreground mb-3 line-clamp-2">{currentPlace.name}</h3>
-            <div className="flex items-center space-x-2 text-foreground mb-3">
-              <MapPin className="w-4 h-4 text-appaccent flex-shrink-0" />
-              <span className="text-sm line-clamp-2">{currentPlace.address}</span>
-            </div>
-          </div>
-          {/* Bottom Content */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground bg-appprimary/40 px-3 py-1 rounded-full">
-                {currentPlace.distance} km away
-              </span>
-            </div>
-            <div className="text-center">
-              <span className="text-xs text-appaccent font-medium bg-card px-3 py-2 rounded-full">
-                Click to open in Google Maps →
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* Navigation Arrows */}
-        <button
-          onClick={prevPlace}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all hover:scale-110"
-        >
-          <ChevronLeft className="w-6 h-6 text-appaccent" />
-        </button>
-        <button
-          onClick={nextPlace}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-card/95 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card transition-all hover:scale-110"
-        >
-          <ChevronRight className="w-6 h-6 text-appaccent" />
-        </button>
       </div>
     </div>
   );

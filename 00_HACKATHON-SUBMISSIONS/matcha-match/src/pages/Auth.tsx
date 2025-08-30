@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -60,74 +61,71 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-matcha flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-matcha-800">🍃 Matcha Finder</h1>
-          <p className="text-matcha-600">Discover your perfect matcha experience</p>
-        </div>
+    <div className="min-h-screen bg-gradient-matcha">
+      <Header />
+      <div className="flex items-center justify-center p-4 flex-1">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold text-matcha-800">🍃 Matcha Finder</h1>
+            <p className="text-matcha-600">Discover your perfect matcha experience</p>
+          </div>
 
-        <Card className="border-matcha-200 shadow-xl bg-white/95 backdrop-blur">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center text-matcha-800">Welcome</CardTitle>
-            <CardDescription className="text-center text-matcha-600">
-              Sign in to your account or create a new one
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-matcha-50">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-matcha-100">
-                  Sign In
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-matcha-100">
-                  Sign Up
-                </TabsTrigger>
-              </TabsList>
+          <Card className="border-matcha-200 shadow-xl bg-white/95 backdrop-blur">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl text-center text-matcha-800">Welcome</CardTitle>
+              <CardDescription className="text-center text-matcha-600">
+                Sign in to your account or create a new one
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-matcha-50">
+                  <TabsTrigger value="signin" className="data-[state=active]:bg-matcha-100">
+                    Sign In
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="data-[state=active]:bg-matcha-100">
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="signin" className="space-y-4 mt-6">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-matcha-700">Email</Label>
-                    <Input id="signin-email" name="email" type="email" placeholder="you@email.com" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-matcha-700">Password</Label>
-                    <Input id="signin-password" name="password" type="password" required />
-                  </div>
-                  <Button type="submit" className="w-full bg-matcha-600 hover:bg-matcha-700 text-white" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In 🍵"}
-                  </Button>
-                </form>
-              </TabsContent>
+                <TabsContent value="signin" className="space-y-4 mt-6">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email" className="text-matcha-700">Email</Label>
+                      <Input id="signin-email" name="email" type="email" placeholder="you@email.com" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password" className="text-matcha-700">Password</Label>
+                      <Input id="signin-password" name="password" type="password" required />
+                    </div>
+                    <Button type="submit" className="w-full bg-matcha-600 hover:bg-matcha-700 text-white" disabled={isLoading}>
+                      {isLoading ? "Signing in..." : "Sign In 🍵"}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-              <TabsContent value="signup" className="space-y-4 mt-6">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-matcha-700">Email</Label>
-                    <Input id="signup-email" name="email" type="email" placeholder="you@email.com" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-matcha-700">Password</Label>
-                    <Input id="signup-password" name="password" type="password" placeholder="Create a secure password" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-confirm" className="text-matcha-700">Confirm Password</Label>
-                    <Input id="signup-confirm" name="confirmPassword" type="password" placeholder="Confirm your password" required />
-                  </div>
-                  <Button type="submit" className="w-full bg-matcha-600 hover:bg-matcha-700 text-white" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account 🍃"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => navigate("/")} className="text-matcha-600 hover:text-matcha-800 hover:bg-matcha-50">
-            ← Back to matcha discovery
-          </Button>
+                <TabsContent value="signup" className="space-y-4 mt-6">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="text-matcha-700">Email</Label>
+                      <Input id="signup-email" name="email" type="email" placeholder="you@email.com" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password" className="text-matcha-700">Password</Label>
+                      <Input id="signup-password" name="password" type="password" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-confirm-password" className="text-matcha-700">Confirm Password</Label>
+                      <Input id="signup-confirm-password" name="confirmPassword" type="password" required />
+                    </div>
+                    <Button type="submit" className="w-full bg-matcha-600 hover:bg-matcha-700 text-white" disabled={isLoading}>
+                      {isLoading ? "Creating account..." : "Create Account 🍃"}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

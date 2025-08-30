@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
 
 export default function Preferences() {
   const [preferences, setPreferences] = useState({
@@ -64,8 +65,9 @@ export default function Preferences() {
   const canProceed = preferences.matchaType && preferences.priceRange && preferences.experience;
 
   return (
-    <div className="min-h-screen bg-gradient-matcha p-4">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-matcha">
+      <Header />
+      <div className="max-w-2xl mx-auto space-y-8 p-4">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-matcha-800">🍃 Tell us about you</h1>
           <p className="text-matcha-600">Help us find your perfect matcha experience</p>
@@ -102,28 +104,31 @@ export default function Preferences() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="all" id="all" />
-                  <Label htmlFor="all" className="text-matcha-700">All types - I love variety!</Label>
+                  <Label htmlFor="all" className="text-matcha-700">I love all matcha! 🍃</Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {/* Sweetness Level */}
+            {/* Sweetness Preference */}
             <div className="space-y-3">
               <Label className="text-lg font-medium text-matcha-800">
-                How sweet do you like it? 🍯
+                How sweet do you like your matcha? 🍯
               </Label>
-              <div className="px-4">
+              <div className="space-y-2">
                 <Slider
                   value={preferences.sweetness}
                   onValueChange={(value) => setPreferences(prev => ({ ...prev, sweetness: value }))}
                   max={100}
-                  step={10}
+                  step={1}
                   className="w-full"
                 />
-                <div className="flex justify-between text-sm text-matcha-600 mt-2">
-                  <span>Bitter & Pure</span>
-                  <span className="font-medium">{preferences.sweetness[0]}% sweet</span>
+                <div className="flex justify-between text-sm text-matcha-600">
+                  <span>Unsweet</span>
+                  <span>Perfectly Sweet</span>
                   <span>Very Sweet</span>
+                </div>
+                <div className="text-center text-matcha-700 font-medium">
+                  Sweetness: {preferences.sweetness[0]}%
                 </div>
               </div>
             </div>
@@ -131,52 +136,56 @@ export default function Preferences() {
             {/* Price Range */}
             <div className="space-y-3">
               <Label className="text-lg font-medium text-matcha-800">
-                What's your budget range? 💰
+                What's your preferred price range? 💰
               </Label>
               <RadioGroup 
                 value={preferences.priceRange} 
                 onValueChange={(value) => setPreferences(prev => ({ ...prev, priceRange: value }))}
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="$" id="budget" />
-                  <Label htmlFor="budget" className="text-matcha-700">$ - Budget-friendly (Under $10)</Label>
+                  <RadioGroupItem value="low" id="low" />
+                  <Label htmlFor="low" className="text-matcha-700">Budget-friendly ($)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="$$" id="moderate" />
-                  <Label htmlFor="moderate" className="text-matcha-700">$$ - Moderate ($10-20)</Label>
+                  <RadioGroupItem value="medium" id="medium" />
+                  <Label htmlFor="medium" className="text-matcha-700">Mid-range ($$)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="$$$" id="upscale" />
-                  <Label htmlFor="upscale" className="text-matcha-700">$$$ - Upscale ($20-35)</Label>
+                  <RadioGroupItem value="high" id="high" />
+                  <Label htmlFor="high" className="text-matcha-700">Premium ($$$)</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="$$$$" id="luxury" />
-                  <Label htmlFor="luxury" className="text-matcha-700">$$$$ - Luxury ($35+)</Label>
+                  <RadioGroupItem value="luxury" id="luxury" />
+                  <Label htmlFor="luxury" className="text-matcha-700">Luxury experience ($$$$)</Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {/* Atmosphere Preferences */}
+            {/* Atmosphere */}
             <div className="space-y-3">
               <Label className="text-lg font-medium text-matcha-800">
-                What atmosphere do you prefer? 🌸 (Select all that apply)
+                What atmosphere do you prefer? 🌟
               </Label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: "quiet", label: "Quiet & peaceful" },
-                  { id: "social", label: "Social & lively" },
-                  { id: "traditional", label: "Traditional Japanese" },
-                  { id: "modern", label: "Modern & trendy" },
-                  { id: "cozy", label: "Cozy & intimate" },
-                  { id: "spacious", label: "Spacious & airy" }
-                ].map((item) => (
-                  <div key={item.id} className="flex items-center space-x-2">
+                  "Cozy & Quiet",
+                  "Modern & Trendy", 
+                  "Traditional & Serene",
+                  "Social & Lively",
+                  "Outdoor & Scenic",
+                  "Artistic & Creative"
+                ].map((atmosphere) => (
+                  <div key={atmosphere} className="flex items-center space-x-2">
                     <Checkbox
-                      id={item.id}
-                      checked={preferences.atmosphere.includes(item.id)}
-                      onCheckedChange={(checked) => handleAtmosphereChange(item.id, checked as boolean)}
+                      id={atmosphere}
+                      checked={preferences.atmosphere.includes(atmosphere)}
+                      onCheckedChange={(checked) => 
+                        handleAtmosphereChange(atmosphere, checked as boolean)
+                      }
                     />
-                    <Label htmlFor={item.id} className="text-matcha-700">{item.label}</Label>
+                    <Label htmlFor={atmosphere} className="text-matcha-700 text-sm">
+                      {atmosphere}
+                    </Label>
                   </div>
                 ))}
               </div>
@@ -185,7 +194,7 @@ export default function Preferences() {
             {/* Experience Level */}
             <div className="space-y-3">
               <Label className="text-lg font-medium text-matcha-800">
-                How would you describe your matcha experience? 🎯
+                What's your matcha experience level? 🎯
               </Label>
               <RadioGroup 
                 value={preferences.experience} 
@@ -193,54 +202,52 @@ export default function Preferences() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="beginner" id="beginner" />
-                  <Label htmlFor="beginner" className="text-matcha-700">New to matcha - show me the basics!</Label>
+                  <Label htmlFor="beginner" className="text-matcha-700">New to matcha - learning!</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="intermediate" id="intermediate" />
-                  <Label htmlFor="intermediate" className="text-matcha-700">I enjoy matcha occasionally</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="advanced" id="advanced" />
-                  <Label htmlFor="advanced" className="text-matcha-700">I'm a matcha enthusiast</Label>
+                  <Label htmlFor="intermediate" className="text-matcha-700">I know what I like</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="expert" id="expert" />
-                  <Label htmlFor="expert" className="text-matcha-700">I'm a matcha connoisseur</Label>
+                  <Label htmlFor="expert" className="text-matcha-700">Matcha connoisseur</Label>
                 </div>
               </RadioGroup>
             </div>
 
             {/* Additional Notes */}
             <div className="space-y-3">
-              <Label className="text-lg font-medium text-matcha-800">
-                Anything else we should know? 📝
+              <Label htmlFor="notes" className="text-lg font-medium text-matcha-800">
+                Any other preferences or notes? 📝
               </Label>
               <Textarea
-                placeholder="Any dietary restrictions, special occasions, or specific requests..."
+                id="notes"
+                placeholder="e.g., I prefer organic matcha, love outdoor seating, want to avoid crowds..."
                 value={preferences.notes}
                 onChange={(e) => setPreferences(prev => ({ ...prev, notes: e.target.value }))}
-                className="border-matcha-200 focus:border-matcha-400"
+                className="min-h-[100px]"
               />
-            </div>
-
-            <div className="flex gap-4 pt-6">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate("/")}
-                className="flex-1 border-matcha-300 text-matcha-700 hover:bg-matcha-50"
-              >
-                Skip for now
-              </Button>
-              <Button 
-                onClick={handleSavePreferences}
-                disabled={!canProceed || isLoading}
-                className="flex-1 bg-matcha-600 hover:bg-matcha-700 text-white"
-              >
-                {isLoading ? "Saving..." : "Save & Find Matcha! 🍃"}
-              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4">
+          <Button
+            onClick={() => navigate("/")}
+            variant="outline"
+            className="border-matcha-200 text-matcha-700 hover:bg-matcha-50"
+          >
+            ← Back to Discovery
+          </Button>
+          <Button
+            onClick={handleSavePreferences}
+            disabled={!canProceed || isLoading}
+            className="bg-matcha-600 hover:bg-matcha-700 text-white px-8"
+          >
+            {isLoading ? "Saving..." : "Save Preferences & Find Spots 🍃"}
+          </Button>
+        </div>
       </div>
     </div>
   );
