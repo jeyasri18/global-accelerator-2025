@@ -13,7 +13,7 @@ export type PlaceDTO = {
 };
 
 export async function fetchPlaces(lat: number, lng: number, radius = 3000) {
-  const url = `http://localhost:8001/api/places/?lat=${lat}&lng=${lng}&radius=${radius}`;
+  const url = `http://localhost:8000/api/places/?lat=${lat}&lng=${lng}&radius=${radius}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Backend ${res.status}`);
   return (await res.json()) as PlaceDTO[];

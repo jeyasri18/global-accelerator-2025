@@ -35,7 +35,24 @@ function getImageForDate(date: Date) {
 function getMatchaDays() {
   const data = localStorage.getItem("matcha_days");
   if (data) return JSON.parse(data);
-  return [];
+  
+  // Initialize with mock data if no localStorage data exists - use all 10 images!
+  const mockData = [
+    "2025-08-21", // 10 days ago - Image 1
+    "2025-08-22", // 9 days ago  - Image 2  
+    "2025-08-23", // 8 days ago  - Image 3
+    "2025-08-24", // 7 days ago  - Image 4
+    "2025-08-25", // 6 days ago  - Image 5
+    "2025-08-26", // 5 days ago  - Image 6
+    "2025-08-27", // 4 days ago  - Image 7
+    "2025-08-28", // 3 days ago  - Image 8
+    "2025-08-29", // 2 days ago  - Image 9
+    "2025-08-30", // yesterday    - Image 10
+  ];
+  
+  // Set the mock data in localStorage
+  localStorage.setItem("matcha_days", JSON.stringify(mockData));
+  return mockData;
 }
 function setMatchaDay(dateStr: string) {
   const days = getMatchaDays();
@@ -43,6 +60,24 @@ function setMatchaDay(dateStr: string) {
     days.push(dateStr);
     localStorage.setItem("matcha_days", JSON.stringify(days));
   }
+}
+
+// Function to reset to mock data for testing
+function resetToMockData() {
+  const mockData = [
+    "2025-08-21", // 10 days ago - Image 1
+    "2025-08-22", // 9 days ago  - Image 2  
+    "2025-08-23", // 8 days ago  - Image 3
+    "2025-08-24", // 7 days ago  - Image 4
+    "2025-08-25", // 6 days ago  - Image 5
+    "2025-08-26", // 5 days ago  - Image 6
+    "2025-08-27", // 4 days ago  - Image 7
+    "2025-08-28", // 3 days ago  - Image 8
+    "2025-08-29", // 2 days ago  - Image 9
+    "2025-08-30", // yesterday    - Image 10
+  ];
+  localStorage.setItem("matcha_days", JSON.stringify(mockData));
+  return mockData;
 }
 function getStreak(days: string[]) {
   // Sort and count consecutive days
@@ -338,12 +373,23 @@ export default function CalendarPage() {
         </div>
 
         {/* Enhanced Back Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 space-x-4">
           <button
             onClick={() => navigate("/home")}
             className="bg-gradient-to-r from-appbg to-appaccent hover:from-appaccent hover:to-appbg text-white font-bold py-4 px-8 rounded-2xl shadow-xl border-2 border-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl transform"
           >
             ← Back to Home
+          </button>
+          
+          {/* Reset to Mock Data Button */}
+          <button
+            onClick={() => {
+              const newData = resetToMockData();
+              setMatchaDays(newData);
+            }}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-2xl shadow-xl border-2 border-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl transform"
+          >
+            🔄 Reset to Mock Data
           </button>
         </div>
       </div>

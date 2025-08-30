@@ -53,8 +53,11 @@ export default function ReviewsSection({ place }: ReviewsSectionProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={toggleForm}
-            className="h-8 px-3 text-xs bg-background/80 hover:bg-background border-appprimary/30 hover:border-appprimary"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleForm();
+            }}
+            className="h-8 px-3 text-xs bg-background/80 hover:bg-background border-appprimary/30 hover:border-appprimary text-white"
           >
             {showForm ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
             {showForm ? "Hide" : "Review"}
@@ -64,8 +67,11 @@ export default function ReviewsSection({ place }: ReviewsSectionProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={toggleReviews}
-              className="h-8 px-3 text-xs bg-background/80 hover:bg-background border-appprimary/30 hover:border-appprimary"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleReviews();
+              }}
+              className="h-8 px-3 text-xs bg-background/80 hover:bg-background border-appprimary/30 hover:border-appprimary text-white"
             >
               {showReviews ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
               {showReviews ? "Hide" : "Show"}
@@ -94,9 +100,9 @@ export default function ReviewsSection({ place }: ReviewsSectionProps) {
 
       {/* No Reviews Message */}
       {!hasReviews && !showForm && (
-        <div className="text-center py-6 text-muted-foreground">
+        <div className="text-center py-6 text-white">
           <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No reviews yet. Be the first to share your experience!</p>
+          <p className="text-sm text-white">No reviews yet. Be the first to share your experience!</p>
         </div>
       )}
     </div>

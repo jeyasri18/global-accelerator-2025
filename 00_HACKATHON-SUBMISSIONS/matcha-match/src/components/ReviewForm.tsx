@@ -64,7 +64,10 @@ export default function ReviewForm({ placeId, placeName, onSubmit }: ReviewFormP
       <button
         key={index}
         type="button"
-        onClick={() => setRating(index + 1)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setRating(index + 1);
+        }}
         className="focus:outline-none transition-transform hover:scale-110"
       >
         <Star
@@ -128,6 +131,7 @@ export default function ReviewForm({ placeId, placeName, onSubmit }: ReviewFormP
         <Button
           type="submit"
           disabled={isSubmitting}
+          onClick={(e) => e.stopPropagation()}
           className="w-full bg-appprimary hover:bg-appprimary/80 text-foreground"
         >
           {isSubmitting ? "Submitting..." : "Submit Review"}

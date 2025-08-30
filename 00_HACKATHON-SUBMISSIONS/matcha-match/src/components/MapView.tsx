@@ -65,7 +65,7 @@ export default function MapView() {
       setError(null);
       
       // Build URL with location parameters if available
-      let url = 'http://localhost:8001/api/places/';
+              let url = 'http://localhost:8000/api/places/';
       if (userLat && userLng) {
         url += `?lat=${userLat}&lng=${userLng}`;
       }

@@ -73,7 +73,7 @@ def chat_with_ai(request):
                     print(f"Using default location (Darling Harbour): {search_lat}, {search_lng}")
                 
                 # Search for places using the determined coordinates
-                places_response = requests.get(f'http://localhost:8001/api/places/?lat={search_lat}&lng={search_lng}&sentiment={sentiment}', timeout=10)
+                places_response = requests.get(f'http://localhost:8000/api/places/?lat={search_lat}&lng={search_lng}&sentiment={sentiment}', timeout=10)
                 
                 if places_response.status_code == 200:
                     places = places_response.json()
@@ -370,7 +370,7 @@ def get_cafe_recommendations(user_message, sentiment, preferences, user_lat=None
         import requests
         
         try:
-            response = requests.get(f'http://localhost:8001/api/places/?lat={lat}&lng={lng}', timeout=10)
+            response = requests.get(f'http://localhost:8000/api/places/?lat={lat}&lng={lng}', timeout=10)
             
             if response.status_code == 200:
                 places = response.json()
@@ -756,7 +756,7 @@ def test_ai_enhancement(request):
         
         # Test 2: Get places from API
         print("2. Getting places from API...")
-        places_response = requests.get(f'http://localhost:8001/api/places/?lat={test_lat}&lng={test_lng}&sentiment={test_sentiment}', timeout=10)
+        places_response = requests.get(f'http://localhost:8000/api/places/?lat={test_lat}&lng={test_lng}&sentiment={test_sentiment}', timeout=10)
         print(f"   API status: {places_response.status_code}")
         
         if places_response.status_code == 200:

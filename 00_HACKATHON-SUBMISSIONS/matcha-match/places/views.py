@@ -397,7 +397,7 @@ class PlacesView(View):
         
         if not photos:
             # Return a fallback placeholder image when no photos are available
-            return ["http://localhost:8001/api/ai/placeholder/400/300/"]
+            return ["http://localhost:8000/api/ai/placeholder/400/300/"]
             
         for photo in photos[:3]:  # Limit to first 3 photos
             photo_reference = photo.get('photo_reference')
@@ -414,15 +414,15 @@ class PlacesView(View):
                     else:
                         print("Warning: No valid Google Maps API key found for photos")
                         # Add fallback placeholder when no API key
-                        photo_urls.append("http://localhost:8001/api/ai/placeholder/400/300/")
+                        photo_urls.append("http://localhost:8000/api/ai/placeholder/400/300/")
                 except Exception as e:
                     print(f"Error constructing photo URL: {e}")
-                    # Add fallback placeholder on error
-                    photo_urls.append("http://localhost:8001/api/ai/placeholder/400/300/")
+                                                                # Add fallback placeholder on error
+                    photo_urls.append("http://localhost:8000/api/ai/placeholder/400/300/")
         
         # If we still have no photos after processing, add a fallback
         if not photo_urls:
-            photo_urls.append("http://localhost:8001/api/ai/placeholder/400/300/")
+            photo_urls.append("http://localhost:8000/api/ai/placeholder/400/300/")
         
         return photo_urls
     

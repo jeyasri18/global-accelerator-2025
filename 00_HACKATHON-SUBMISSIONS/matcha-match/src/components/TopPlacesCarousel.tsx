@@ -53,7 +53,7 @@ const TopPlacesCarousel: React.FC = () => {
     const fetchTopPlaces = async () => {
       try {
         console.log('Fetching places for location:', userLocation);
-        const response = await fetch(`http://localhost:8001/api/places/?lat=${userLocation.lat}&lng=${userLocation.lng}`);
+        const response = await fetch(`http://localhost:8000/api/places/?lat=${userLocation.lat}&lng=${userLocation.lng}`);
         console.log('API response status:', response.status);
         
         if (response.ok) {
@@ -336,7 +336,7 @@ const TopPlacesCarousel: React.FC = () => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src =
-                        `http://localhost:8001/api/ai/placeholder/400/200/`;
+                        `http://localhost:8000/api/ai/placeholder/400/200/`;
                     }}
                   />
                 ) : (
